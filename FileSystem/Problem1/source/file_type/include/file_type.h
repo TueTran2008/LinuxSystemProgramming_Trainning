@@ -13,17 +13,19 @@
 #define FILE_MAX_IN_FOLDER 256
 
 /**
- * @brief Read the file data to a string
+ * @brief Get all file in the directory input_dir
  * 
  * @param[in] input_dir Pointer to input directory string
  * @param[in] p_out Pointer to two demention array hold output data
  * @param[out] number_of_file  The number of file in the directory
+ * @note number of file should not be greater than FILE_MAX_IN_FOLDER,
+ *       your must increase FILE_MAX_IN_FOLDER if overflow
  * @return 0 if success
  *         1 if fail
  */
 int file_type_list_file(const char* input_dir, char p_out[][256], int *number_of_file);
 /**
- * @brief Display the File type Attribute (ex, Regular, Directory, Special(character, block, socket, ...))
+ * @brief Display the File type Attribute (ex: Regular, Directory, Special(character, block, socket, ...))
  * 
  * @param[in] sb Pointer to stat structure, which holds information about file (Like Inode)
  */

@@ -5,7 +5,7 @@ SRC += source/file_handle/*.c
 SRC += source/file_type/*.c
 
 all: main.c $(SRC)
-	$(CC) $(INC) main.c $(SRC) -o problem1.exe
+	$(CC) $(INC) main.c $(SRC) -o file_p1.exe
 
 debug_memory: main.c $(SRC)
 	$(CC) $(INC) main.c $(SRC) -std=c11 -lm -o debug

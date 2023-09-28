@@ -2,25 +2,22 @@
 #include <stdio.h>
 #include "file_handle.h"
 #include "file_type.h"
-//#include <limits.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <time.h>
 #include <string.h>
 
 int main(int argc, char *argv[])
 {
-    char list_file[256][256];
+    char list_file[FILE_MAX_IN_FOLDER][256];
     char **p_list_file = (char**)list_file;
     char temp_dir[256*2];
     int number_of_file = 0;
     struct stat sb;
     int ret = 0;
     bool is_current_directory = false;
-    if (argc < 2|| strcmp(argv[1], "--help") == 0)
+    if (argc < 2 || strcmp(argv[1], "--help") == 0)
     {
-        printf("Listing file type name: <Input Path>\r\n");
+        printf("%s:Listing file type name: <Input Path>\r\n", argv[0]);
         return 0;
     }
     if (strcmp(argv[1], ".") == 0)
