@@ -1,0 +1,12 @@
+#Hướng dẫn setup để tự khởi động và chạy login programm
+
+Theo tìm hiểu được sẽ có 3 cách
+1. Sử dụng SystemD
+2. Sử dụng cron
+3. Cấu hình ở /etc/rc.local hoặc /etc/rc*.dẫn
+
+Ở đây mình sẽ sử dụng cách 2:
+B1: chạy command crontab -e
+B2: Edit file crontab đến đường dẫn chương trình daemon process
+B3: save và check lại bằng câu lệnh crontab -l 
+B4: Reboot và tận hưởng

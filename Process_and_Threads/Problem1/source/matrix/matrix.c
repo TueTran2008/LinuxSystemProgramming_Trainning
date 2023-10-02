@@ -58,8 +58,9 @@ static void *thread_callback(void *arg)
 	
 	float *p = (float*)malloc(sizeof(float));
 		*p = k;
-	
-//Used to terminate a thread and the return value is passed as a pointer
+	free(data);
+    while(1);
+    //Used to terminate a thread and the return value is passed as a pointer
 	pthread_exit(p);
 }
 
@@ -184,11 +185,14 @@ matrix_t *multiply_matrix_mul_thread(matrix_t *p_matrix_a, matrix_t *p_matrix_b)
         void *k;
         pthread_join(thread[i], &k);
         float *p = (float *)k;
+        
         // printf("%f ",*p);
         // if ((i + 1) % p_matrix_b->m_column == 0)
         //     printf("\n");
+        free(k);
 	}
     free(thread);
+
     return p_matrix_product;
 }
 

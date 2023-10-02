@@ -9,8 +9,8 @@ int main(int argc, char *argv[])
     char *p_link = NULL;
     if (argc < 3 || strcmp(argv[1], "--help") == 0)
     {
-        printf("%s:Listing file type name: <Input file> <Output file>\r\n", argv[0]);
-        printf("Example: ./file_p2.ext test.txt \"Hello World from Tran Duc Tue\"\r\n");
+        printf("%s:Listing file type name: <Input file> <Out link file>\r\n", argv[0]);
+        printf("Example: ./file_p2.ext test \"Hello World from Tran Duc Tue\"\r\n");
         return 0;
     }
     ret = file_handle_check_file_exist(argv[1]);

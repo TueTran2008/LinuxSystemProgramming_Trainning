@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
 
     matrix_init_value(matrix_a);
     matrix_init_value(matrix_b);
-    matrix_mul = multiply_matrix(matrix_a, matrix_b);
-    free(matrix_mul);
-    matrix_mul = multiply_matrix_mul_thread(matrix_a, matrix_b);
 
+    matrix_mul = multiply_matrix_mul_thread(matrix_a, matrix_b);
+    free(matrix_mul);
+    
 }
