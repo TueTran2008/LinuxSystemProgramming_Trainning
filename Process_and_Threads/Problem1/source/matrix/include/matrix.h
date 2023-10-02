@@ -60,6 +60,16 @@ matrix_t *sum_matrix(matrix_t *p_matrix_a, matrix_t *p_matrix_b);
 * @return *product_matrix <pointer point to struct matrix_t of the product of 2 matrix>
 */
 matrix_t *multiply_matrix(matrix_t *p_matrix_a, matrix_t *p_matrix_b);
+/*!
+* @brief <Calculate the multiple of two matrices - using multi thread>
+*
+* @param *p_matrix_a [In] <pointer point to struct matrix_t of the first matrix>
+*
+* @param *p_matrix_b [In] <pointer point to struct matrix_t of the seccond matrix>
+*
+* @return *product_matrix <pointer point to struct matrix_t of the product of 2 matrix>
+*/
+matrix_t *multiply_matrix_mul_thread(matrix_t *p_matrix_a, matrix_t *p_matrix_b);
 
 /*!
 * @brief <Free matrix allocated memory>

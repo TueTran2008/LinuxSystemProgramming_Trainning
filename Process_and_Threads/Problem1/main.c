@@ -24,6 +24,8 @@ int main(int argc, char *argv[])
     if(argc < 5 || strcmp(argv[1], "--help") == 0)
     {
         printf("Compare mulpiple matrix in c\r\n");
+        printf("Please enter matrix 1 col - matrix 1 row - matrix 2 col - matrix 2 row\r\n");
+        return 0;
     }
     const int row_a = atoi(argv[1]);
     const int col_a = atoi(argv[2]);
@@ -36,18 +38,11 @@ int main(int argc, char *argv[])
 
     matrix_a = initialize_matrix(row_a, col_a);
     matrix_b = initialize_matrix(row_b, col_b);
-    //matrix_mul = initialize_matrix(row_mul, col_mul);
 
     matrix_init_value(matrix_a);
     matrix_init_value(matrix_b);
-
-    //print_matrix(matrix_a);
-   // print_matrix(matrix_b);
-
-    time_count_begin();
     matrix_mul = multiply_matrix(matrix_a, matrix_b);
-    time_count_stop();
-    time_count_print();
+    free(matrix_mul);
+    matrix_mul = multiply_matrix_mul_thread(matrix_a, matrix_b);
 
-    //print_matrix(matrix_mul);
 }

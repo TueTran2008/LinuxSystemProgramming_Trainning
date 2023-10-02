@@ -1,14 +1,7 @@
 #include "matrix.h"
 /*Copy from Stephen_Chu - Maintain by Darwin Tran*/
 #include <pthread.h>
-
-typedef struct 
-{
-    matrix_t *matrix1;
-    matrix_t *matrix2;
-}matrix_mul_t;
-
-
+#include "time_count.h"
 static int clean_stdin()
 {
     while(getchar() != '\n')
@@ -25,6 +18,7 @@ static bool check_matrix_can_add(int matrix_a_row, int matrix_a_col, int matrix_
 
 static bool check_matrix_can_multiply(int matrix_a_col, int matrix_b_row)
 {
+    //printf("Check matrix can multiply\r\n");
     return (matrix_a_col == matrix_b_row);
 }
 
@@ -53,9 +47,20 @@ static float get_input_float()
     
     return return_value;
 }
-static void thread_callback(void *arg)
+static void *thread_callback(void *arg)
 {
-
+	float *data = (float *)arg;
+    float k;
+	int i = 0;
+	int x = (int)data[0];
+	for (i = 1; i <= x; i++)
+		k += data[i]*data[i + x];
+	
+	float *p = (float*)malloc(sizeof(float));
+		*p = k;
+	
+//Used to terminate a thread and the return value is passed as a pointer
+	pthread_exit(p);
 }
 
 
@@ -139,25 +144,52 @@ matrix_t *sum_matrix(matrix_t *p_matrix_a, matrix_t *p_matrix_b)
 
 matrix_t *multiply_matrix_mul_thread(matrix_t *p_matrix_a, matrix_t *p_matrix_b)
 {
-    pthread_t thread[p_matrix_a->m_row * p_matrix_b->m_column];
-    int thread_index = 0;
+
     if(!check_matrix_can_multiply(p_matrix_a->m_column, p_matrix_b->m_row))
     {
         printf("Cannot muliply matrix\r\n");
         return NULL;
     }
-    matrix_t *p_matrix_product = initialize_matrix(p_matrix_a->m_row, p_matrix_a->m_column);
+    int max_thread = p_matrix_a->m_row * p_matrix_b->m_column;
 
+    pthread_t *thread;
+    thread = (pthread_t*)malloc(max_thread * sizeof(pthread_t));
+
+    int thread_index = 0;
+    matrix_t *p_matrix_product = initialize_matrix(p_matrix_a->m_row, p_matrix_a->m_column);
+    float *p_data = NULL;
+    printf("Using multithread\r\n");
+    time_count_begin();
     for (int i = 0; i < p_matrix_a->m_row; i++) 
     {
         for (int j = 0; j < p_matrix_b->m_column; j++) 
         {
-            p_matrix_product->m_data[i][j] = 0;
-            for (int k = 0; k < p_matrix_a->m_column; k++) {
-                p_matrix_product->m_data[i][j] += p_matrix_a->m_data[i][k] * p_matrix_b->m_data[k][j];
+            p_data = (float*)malloc((p_matrix_a->m_row * p_matrix_b->m_column) * sizeof(float));
+            p_data[0] = p_matrix_a->m_column;
+            for(int k = 0; k < p_matrix_a->m_column; k++)
+            {
+                p_data[k + 1] = p_matrix_a->m_data[i][k];
             }
+            for(int k = 0; k < p_matrix_b->m_row; k++)
+            {
+                p_data[k + 1 + p_matrix_a->m_column] = p_matrix_b->m_data[k][j];
+            }
+            pthread_create(&thread[thread_index++], NULL, thread_callback, (void*)p_data);
         }
     }
+    time_count_stop();
+    time_count_print();
+	for (int i = 0; i < max_thread; i++)
+	{
+        void *k;
+        pthread_join(thread[i], &k);
+        float *p = (float *)k;
+        // printf("%f ",*p);
+        // if ((i + 1) % p_matrix_b->m_column == 0)
+        //     printf("\n");
+	}
+    free(thread);
+    return p_matrix_product;
 }
 
 /*FUNCTION===================================================================================
@@ -173,7 +205,8 @@ matrix_t *multiply_matrix(matrix_t *p_matrix_a, matrix_t *p_matrix_b)
     }
     
     matrix_t *p_matrix_product = initialize_matrix(p_matrix_a->m_row, p_matrix_a->m_column);
-
+    printf("Using single thread\r\n");
+    time_count_begin();
     for (int i = 0; i < p_matrix_a->m_row; i++) {
         for (int j = 0; j < p_matrix_b->m_column; j++) {
             p_matrix_product->m_data[i][j] = 0;
@@ -182,6 +215,8 @@ matrix_t *multiply_matrix(matrix_t *p_matrix_a, matrix_t *p_matrix_b)
             }
         }
     }
+    time_count_stop();
+    time_count_print();
     return p_matrix_product;
 }
 
