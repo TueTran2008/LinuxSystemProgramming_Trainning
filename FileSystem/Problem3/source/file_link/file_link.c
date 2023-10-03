@@ -2,7 +2,7 @@
 #include "file_handle.h"
 #include <unistd.h>
 #include <errno.h>
-#
+
 int file_link_create(file_link_t file_link, char *input_old_path, char *input_new_path)
 {
     int ret = 0;
@@ -11,7 +11,9 @@ int file_link_create(file_link_t file_link, char *input_old_path, char *input_ne
         printf("%s input NULL value\r\n", __FUNCTION__);
         return 1;
     }
-    char *path_new = (char*)malloc(strlen(input_new_path) + 2);
+    char name_buf[strlen(input_new_path) + 2];
+    char *path_new = name_buf;
+    memset(path_new, 0, sizeof(name_buf));
     ret = file_handle_check_file_exist(input_old_path);
     if (ret == 0)
     {
