@@ -50,7 +50,6 @@ int file_link_create(file_link_t file_link, char *input_old_path, char *input_ne
             printf("%s:Error when create soft link - errno: %d\r\n", __FUNCTION__, errno);
             return 1;
         }
-        
     }
     else
     {
@@ -58,6 +57,5 @@ int file_link_create(file_link_t file_link, char *input_old_path, char *input_ne
         free(path_new);
         return 1;
     }
-
     return 0;
 }
