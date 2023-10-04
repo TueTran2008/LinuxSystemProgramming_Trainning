@@ -42,11 +42,23 @@ uint32_t utilities_calculate_crc32(uint8_t *data, uint32_t length);
  */
 int ultilities_is_number(char *str);
 /*!
- * @brief           Check the input string is a number
- * @param[in]       str Pointer to string data
- * @retval          1 if is a number
- *                  0 if not a numer
+ * @brief           Get the string of date and time 
+ * @param[in]       format Format of the output string
  */
 char *utilities_get_time(const char *format);
+/*!
+ * @brief           Get the string of date and time 
+ * @param[in]       char_to_find Character we want to find in string
+ * @param[in]       buffer_to_find Pointer point to string when want to filter
+ */
+int16_t utilities_find_index_of_char(char char_to_find, char *buffer_to_find);
+/*!
+ * @brief           Get the string of date and time 
+ * @param[in]       buffer_source Pointer to source buffer want to find
+ * @param[out]      buffer_des  Pointer point to buffer we want data to copy form begin to end
+ * @param[in]       find_char_begin Character we want to begin from
+ * @param[in]       find_char_end Character we want to end with
+ */
+uint8_t utilities_copy_parameter(char* buffer_source, char* buffer_des, char find_char_begin, char find_char_end);
 
 #endif // __UTILITIES_H__
