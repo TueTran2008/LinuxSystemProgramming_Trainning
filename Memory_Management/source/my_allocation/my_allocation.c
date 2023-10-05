@@ -244,10 +244,10 @@ void *my_realloc(void* ptr, size_t size)
 void my_free(void *ptr)
 {
     /*Just do nothing*/
-    // if (ptr == NULL)
-    // {
-    //     return;
-    // }
+    if (ptr == NULL)
+    {
+        return;
+    }
 	/* we just insert this item into the front of the linked list.  Note
 	 * that we don't touch the length as we assume this is still correct.*/
 	block_free_header_t * new_freed_header = FREE_BLOCK_HEADER(ptr);
@@ -263,7 +263,8 @@ void my_free(void *ptr)
 		new_freed_header->next_free_chunk = NULL;
 		m_free_ll_head = new_freed_header;
 	}
-#if(0) /*Merging operation -> Do Later*/
+#if(0) /*Since I don't see The Linux Programming Interface says anything about merging  -> This is optional*/
+    /*We don't know the continous blocks so we have to scan all the current block when free*/
     /*Doing merging block*/
     block_free_header_t *current_header = m_free_ll_head;
     block_free_header_t *temp_header = NULL;

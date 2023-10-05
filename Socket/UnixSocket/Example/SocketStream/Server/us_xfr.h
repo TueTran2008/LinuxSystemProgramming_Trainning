@@ -8,13 +8,13 @@
 * the file COPYING.gpl-v3 for details.                                    *
 \*************************************************************************/
 
-/* Listing 57-5 */
+/* Listing 57-2 */
 
-/* ud_ucase.h
+/* us_xfr.h
 
-   Header file for ud_ucase_sv.c and ud_ucase_cl.c.
+   Header file for us_xfr_sv.c and us_xfr_cl.c.
 
-   These programs employ sockets in /tmp. This makes it easy to compile
+   These programs employ a socket in /tmp. This makes it easy to compile
    and run the programs. However, for a security reasons, a real-world
    application should never create sensitive files in /tmp. (As a simple of
    example of the kind of security problems that can result, a malicious
@@ -25,9 +25,11 @@
 */
 #include <sys/un.h>
 #include <sys/socket.h>
-#include <ctype.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
-#define BUF_SIZE 10             /* Maximum size of messages exchanged
-                                   between client and server */
+#define SV_SOCK_PATH "/home/tuetd/Desktop/MyFolder/ud_ucase"
 
-#define SV_SOCK_PATH "/tmp/ud_ucase"
+#define BUF_SIZE 100
