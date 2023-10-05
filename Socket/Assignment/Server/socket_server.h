@@ -8,19 +8,22 @@
 * the file COPYING.gpl-v3 for details.                                    *
 \*************************************************************************/
 
-/* Listing 59-2 */
+/* Listing 59-5 */
 
-/* i6d_ucase.h
+/* is_seqnum.h
 
-   Header file for i6d_ucase_sv.c and i6d_ucase_cl.c.
+   Header file for is_seqnum_sv.c and is_seqnum_cl.c.
 */
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <sys/socket.h>
-#include <ctype.h>
+#include <signal.h>
+#include "read_line.h"          /* Declaration of readLine() */
+#include <stdio.h>
+#include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include "utilities.h"
 
-#define BUF_SIZE 10                     /* Maximum size of messages exchanged
-                                           between client and server */
+#define PORT_NUM "50000"        /* Port number for server */
 
-#define PORT_NUM 50002                  /* Server port number */
+#define INT_LEN 30              /* Size of string able to hold largest integer (including terminating '\n') */
