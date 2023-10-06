@@ -1,5 +1,6 @@
 #include "socket_server.h"
 #include "socket_client.h"
+#include "utilities.h"
 #include <string.h>
 
 int main(int argc, char *argv[])
@@ -10,6 +11,10 @@ int main(int argc, char *argv[])
         printf("1 as Server\r\n2 as Client");
         printf("Example:..mysocket 1 localhost");
     }   
+    if(ultilities_is_number(argv[1]) == 0)
+    {
+        printf("Invalid mode: Please choose between Client: 2 or Server: 1. Enter --help to get more information\r\n");
+    }
     int mode = atoi(argv[1]);
     if (mode == 1)
     {

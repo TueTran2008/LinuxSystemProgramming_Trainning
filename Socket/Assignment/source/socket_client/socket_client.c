@@ -84,7 +84,7 @@ void socket_client(char *p_input_server_name)
         }
         else
         {
-            printf("Response from server: %s - len: %ld\r\n", buffer, num_read);
+            printf("Response from server: %s\r\n", buffer);
         }
         cfd = socket(m_server_info.ai_family, m_server_info.ai_socktype, m_server_info.ai_protocol);
         if (cfd == -1)
