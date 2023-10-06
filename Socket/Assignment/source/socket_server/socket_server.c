@@ -17,7 +17,7 @@
  *                              PRIVATE FUNCTION 
 ******************************************************************************/
 /**
- * @brief Periodic thread perform delete each conenction thrread
+ * @brief Periodic thread perform delete each conenction thread
  * @param arg Pointer point to argument 
  */
 static void *delete_thread(void *arg)
@@ -36,10 +36,10 @@ static void *delete_thread(void *arg)
         {
             struct node *curr = *l_thread_list;
             int node_index = 0;
-            // Traverse the list and perform the operation on each node
+            // Traverse the list and perform delete each conenction on each node thread node
             while (curr != NULL) 
             {
-                if(curr->data != NULL)
+                if (curr->data != NULL)
                 {
                     ss_thread_data_t* thread_data = (ss_thread_data_t*)curr->data;
                     pthread_t thread_id = thread_data->thread_id;
@@ -66,7 +66,7 @@ static void *delete_thread(void *arg)
     return NULL;
 }
 /*!
- * @brief           Reverse string with the lawt newline character
+ * @brief           Reverse string with the last newline character
  * @param[in]       p_string_in Pointer to input string
  */
 static void reverse_socket_string(char *p_string_in)
@@ -84,7 +84,7 @@ static void reverse_socket_string(char *p_string_in)
     sprintf(p_string_in, "%s\n", reverse_buf);
 }
 /**
- * @brief Connection thread perform read and write function
+ * @brief Connection thread read and write socket data 
  * @param arg Pointer point to argument 
  */
 static void *thread_func(void *arg)
@@ -121,7 +121,7 @@ static void *thread_func(void *arg)
     }
 }
 /******************************************************************************
- *                              GLoBAL FUNCTION 
+ *                              GLOBAL FUNCTION 
 ******************************************************************************/
 void socket_server(char *p_input_hostname)
 {
@@ -225,7 +225,7 @@ void socket_server(char *p_input_hostname)
         int ret = pthread_tryjoin_np(delete_socket_thread, NULL);
         if (ret == 0)
         {
-            printf("We shold never reach this\r\n");
+            printf("We should never reach this\r\n");
             exit(0);
         }
     }

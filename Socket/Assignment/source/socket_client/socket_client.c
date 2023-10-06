@@ -4,9 +4,13 @@
 #include <netdb.h>
 #include <signal.h>
 #include "socket_client.h"
-
+/******************************************************************************
+ *                              PRIVATE VARIABLE 
+******************************************************************************/
 static struct addrinfo m_server_info;
-
+/******************************************************************************
+ *                              PUBLIC FUNCTION 
+******************************************************************************/
 void socket_client(char *p_input_server_name)
 {
     if(p_input_server_name == NULL)
