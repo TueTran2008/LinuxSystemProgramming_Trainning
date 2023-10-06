@@ -1,3 +1,6 @@
+/******************************************************************************
+ *                              HEADER AND DIRECTORY 
+******************************************************************************/
 #include <netdb.h>
 #include <signal.h>
 #include "socket_client.h"
@@ -15,10 +18,6 @@ void socket_client(char *p_input_server_name)
     ssize_t num_read;
     struct addrinfo hints;
     struct addrinfo *result, *rp;
-
-    if (argc < 2 || strcmp(argv[1], "--help") == 0)
-        printf("%s server-host [sequence-len]\n", argv[0]);
-
     /* Call getaddrinfo() to obtain a list of addresses that
        we can try connecting to */
 
@@ -64,16 +63,15 @@ void socket_client(char *p_input_server_name)
     while(1)
     {
         char input[100];
+        printf("Please enter your input:");
         int ret = scanf("%s", input);
-        printf("My input:%s - len:%d\r\n", input, ret);
         if (write(cfd, input, strlen(input)) !=  strlen(input))
             printf("Partial/failed write (reqLenStr)");
         if (write(cfd, "\n", 1) != 1)
             printf("Partial/failed write (newline)");
-        printf("Wait to read\r\n");
         /* Read and display sequence number returned by server */
         char buffer[100];
-        num_read = readLine(cfd, buffer, sizeof(buffer));
+        num_read = read_line(cfd, buffer, sizeof(buffer));
         if (num_read == -1)
         {
             printf("readLine");

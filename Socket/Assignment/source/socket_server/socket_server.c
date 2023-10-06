@@ -22,12 +22,14 @@
  */
 static void *delete_thread(void *arg)
 {
+    pthread_t thread_self = pthread_self();
+    printf("thread id:%ld\r\n", thread_self);
     llist *l_thread_list = (llist*)arg;
     while (1)   /*Infinity loops delete all socket thread*/
     {
         if (l_thread_list == NULL || *l_thread_list == NULL) 
         {
-            printf("llist_traverse: list is null\n");
+            //printf("llist_traverse: list is null\n");
             continue;
         }
         else
@@ -41,13 +43,19 @@ static void *delete_thread(void *arg)
                 {
                     ss_thread_data_t* thread_data = (ss_thread_data_t*)curr->data;
                     pthread_t thread_id = thread_data->thread_id;
-                    int ret = pthread_tryjoin_np(thread_id, NULL);
-                    if (ret == 0)
+                    if (thread_self != thread_id)
                     {
-                        printf("Delete thread id %ld\r\n", thread_id);
-                        llist_delete_at_position(l_thread_list, node_index);
-                        free(curr->data);
-                        break;
+                        if (node_index)
+                        {
+                            int ret = pthread_tryjoin_np(thread_id, NULL);
+                            if (ret == 0)
+                            {
+                                printf("Delete thread id %ld\r\n", thread_id);
+                                llist_delete_at_position(l_thread_list, node_index);
+                                free(curr->data);
+                                break;
+                            }
+                        }
                     }
                     curr = curr->next;
                     node_index++;
@@ -124,7 +132,7 @@ void socket_server(char *p_input_hostname)
     struct addrinfo hints;
     struct addrinfo *result, *rp;
     int ret;
-    pthread_t delete_socket_thread;
+    static pthread_t delete_socket_thread;
     if(p_input_hostname == NULL)
     {
         printf("Please specify host name\r\n");
@@ -182,6 +190,8 @@ void socket_server(char *p_input_hostname)
     freeaddrinfo(result);
     llist *thread_list = llist_create(NULL);
     ret = pthread_create(&delete_socket_thread, NULL, delete_thread, (void*)thread_list);
+    llist_insert_at_end(thread_list, &delete_socket_thread);
+    printf("Insert thread %ld to list\r\n", delete_socket_thread);
     if (ret != 0)
     {
         printf("Error when create delete thread\r\n");
@@ -210,7 +220,7 @@ void socket_server(char *p_input_hostname)
                 continue;
             }
             printf("Insert thread %ld to list\r\n", p_new_thread->thread_id);
-            llist_push(thread_list, p_new_thread);
+            llist_insert_at_end(thread_list, p_new_thread);
         }
         int ret = pthread_tryjoin_np(delete_socket_thread, NULL);
         if (ret == 0)
