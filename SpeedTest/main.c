@@ -100,8 +100,8 @@ int main(int argc, char *argv[])
         printf("Distance: %lf (km)\n", nearest_servers[best_server_index].distance);
         printf("Latency: %d (us)\n", nearest_servers[best_server_index].latency);
         DEBUG_INFO("===============================================\n");
-        speedtest_download(&nearest_servers[best_server_index], 3);
-
+        //speedtest_download(&nearest_servers[best_server_index], 4);
+        speedtest_upload(&nearest_servers[best_server_index], 4);
     }
     return 0;
 }

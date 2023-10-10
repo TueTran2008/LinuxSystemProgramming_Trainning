@@ -23,7 +23,7 @@
 /**
  * @brief Number of nearest servers to consider.
  */
-#define NEAREST_SERVERS_NUM 5
+#define NEAREST_SERVERS_NUM 10
 /**
  * @brief Request URL for servers' location data.
  */

@@ -108,31 +108,28 @@ static void *download_thread(void *arg)
     char sbuf[315] = {0}, rbuf[DL_BUFFER_SIZE];
     struct timeval tv;
     fd_set fdSet;
-    DEBUG_INFO("Socket: %d\r\n", t_arg->servinfo.ai_family);
     if ((fd = socket(t_arg->servinfo.ai_family, SOCK_STREAM, 0)) == -1) 
     {    
         DEBUG_SPEEDTEST_ERROR("Open socket error! - ernno: %d\r\n\n");
         sleep(5);
         goto err;
     }
- 
     if (connect(fd, (struct sockaddr *)t_arg->servinfo.ai_addr, sizeof(struct sockaddr)) == -1) {
         DEBUG_SPEEDTEST_ERROR("Socket connect error!\n");
         goto err;
     }
-
     sprintf(sbuf,
             "GET /%s HTTP/1.0\r\n"
             "Host: %s\r\n"
             "User-Agent: status\r\n"
-            "Accept: */*\r\n\r\n", t_arg[i].request_url, t_arg[i].domain_name);
+            "Accept: */*\r\n\r\n", t_arg->request_url, t_arg->domain_name);
 
     if(send(fd, sbuf, strlen(sbuf), 0) != strlen(sbuf)) 
     {
         DEBUG_SPEEDTEST_ERROR("Can't send data to server\n");
         goto err;
     }
-    DEBUG_SPEEDTEST_INFO("%s: HTTP Get message: %s\r\n", sbuf);
+    DEBUG_SPEEDTEST_VERBOSE("%s: HTTP Get message: %s\r\n", __FUNCTION__, sbuf);
     while(1) 
     {
         /*None Blocking API*/
@@ -174,7 +171,8 @@ err:
  * @param arg Pointer to thread data.
  * @return NULL.
  */
-static void *upload_thread(void *arg) {
+static void *upload_thread(void *arg) 
+{
     int fd;
     char data[UL_BUFFER_SIZE], sbuf[512];
     int i, j, size = 0;
@@ -191,7 +189,7 @@ static void *upload_thread(void *arg) {
         goto err;
     }
 
-    if(connect(fd, (struct sockaddr *)&t_arg->servinfo, sizeof(struct sockaddr)) == -1) {
+    if (connect(fd, (struct sockaddr *)t_arg->servinfo.ai_addr, sizeof(struct sockaddr)) == -1){
         DEBUG_SPEEDTEST_ERROR("Socket connect error!\n");
         goto err;
     }
@@ -207,7 +205,7 @@ static void *upload_thread(void *arg) {
         printf("Can't send header to server\n");
         goto err;
     }
-    DEBUG_SPEEDTEST_INFO("%s: HTTP Post message: %s\r\n", sbuf);
+
     pthread_mutex_lock(&pthread_mutex);
     total_ul_size += size;
     pthread_mutex_unlock(&pthread_mutex);
@@ -304,7 +302,7 @@ static void *calculate_dl_speed_thread(void *arg)
     while(1) 
     {
         stop_dl_time = get_uptime();
-        printf("Stop download time: %f\r\n", stop_dl_time);
+        //printf("Stop download time: %f\r\n", stop_dl_time);
         duration = stop_dl_time - start_dl_time;
         dl_speed = (double)total_dl_size / 1000 / 1000 / duration * 8;
         if(duration > 0) 
@@ -391,7 +389,6 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
     }
     DEBUG_SPEEDTEST_INFO("%s: request_url:%s\r\n", __FUNCTION__, request_url);
     start_dl_time = get_uptime();
-    printf("Start download time: %f\r\n", start_dl_time);
     while(1) 
     {
         for(i = 0; i < number_of_thread; i++) 
@@ -402,7 +399,6 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
             
             if(download_thread_data[i].running == 0) 
             {
-                printf("Download thread data: %d\r\n", download_thread_data[i].servinfo.ai_family);
                 download_thread_data[i].thread_index = i;
                 download_thread_data[i].running = 1;
                 pthread_create(&download_thread_data[i].tid, NULL, download_thread, &download_thread_data[i]);
@@ -430,17 +426,32 @@ int speedtest_upload(server_data_t *nearest_server, unsigned int number_of_threa
     char dummy[128]={0}, request_url[128]={0};
     sscanf(nearest_server->url, "http://%[^/]/%s", dummy, request_url);
     start_ul_time = get_uptime();
-
-    st_thread_data_t *up_thread_data = (st_thread_data_t*)malloc(number_of_thread * sizeof(st_thread_data_t));
     pthread_t calculate_thread;
+    if (nearest_server == NULL)
+    {
+        DEBUG_SPEEDTEST_ERROR("%s: Nearest server is NULL\r\n");
+        return -1;
+    }
+    if (number_of_thread == 0)
+    {
+        DEBUG_SPEEDTEST_ERROR("%s: No nearest server is NULL\r\n");
+        return -1;
+    }
+    st_thread_data_t *up_thread_data = (st_thread_data_t*)malloc(number_of_thread * sizeof(st_thread_data_t));
+    if(up_thread_data == NULL)
+    {
+        DEBUG_SPEEDTEST_ERROR("Cannot allocate memory of upload thread\r\n");
+        return -1;
+    }
+    memset(up_thread_data, 0, sizeof(st_thread_data_t) * number_of_thread);
     pthread_create(&calculate_thread, NULL, calculate_ul_speed_thread, NULL);
     while(1) 
     {
         for(i = 0; i < number_of_thread; i++) 
         {
-            memcpy(&up_thread_data[i].servinfo, &nearest_server->servinfo, sizeof(struct addrinfo));
-            memcpy(&up_thread_data[i].domain_name, &nearest_server->domain_name, sizeof(nearest_server->domain_name));
-            memcpy(&up_thread_data[i].request_url, request_url, sizeof(request_url));
+            memcpy(&up_thread_data[i].servinfo, &nearest_server->servinfo, sizeof(up_thread_data[i].servinfo));
+            memcpy(up_thread_data[i].domain_name, nearest_server->domain_name, sizeof(nearest_server->domain_name));
+            memcpy(up_thread_data[i].request_url, request_url, sizeof(request_url));
             if(up_thread_data[i].running == 0) 
             {
                 up_thread_data[i].thread_index = i;

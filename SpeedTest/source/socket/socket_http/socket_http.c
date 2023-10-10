@@ -77,7 +77,7 @@ int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *requ
     memset(sbuf, 0, sizeof(sbuf));
     memset(tmp_path, 0, sizeof(tmp_path));
     memset(rbuf, 0, sizeof(sbuf));
-    DEBUG_INFO("%s: %d", __FUNCTION__, serv->sin_family);
+    DEBUG_INFO("%s: Sin family:%d\r\n", __FUNCTION__, serv->sin_family);
     if ((fd = socket(serv->sin_family, SOCK_STREAM, 0)) == -1) 
     {
         DEBUG_SOCKET_HTTP_ERROR("Open socket error!\n");
