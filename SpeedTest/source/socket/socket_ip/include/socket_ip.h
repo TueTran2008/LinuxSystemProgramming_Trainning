@@ -34,6 +34,6 @@ int socket_ipv4_get_from_url(char *p_input_server_name, char *p_port, struct add
  * This macro defines the debug level for socket IP operations. Modify this value to control
  * the verbosity of debug messages related to socket IP operations.
  */
-#define DEBUG_SOCKET_IP_LEVEL 2
+#define DEBUG_SOCKET_IP_LEVEL 1
 
 #endif /* SOCKET_IP_H */

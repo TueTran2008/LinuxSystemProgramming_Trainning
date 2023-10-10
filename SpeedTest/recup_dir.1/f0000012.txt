@@ -1,0 +1,3 @@
+
+An operating system wasn't found. Try disconnecting any drives that don't
+contain an operating system.

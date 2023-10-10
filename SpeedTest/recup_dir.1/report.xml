@@ -1,0 +1,1365 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dfxml xmloutputversion='1.0'>
+  <metadata 
+  xmlns='http://www.forensicswiki.org/wiki/Category:Digital_Forensics_XML' 
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' 
+  xmlns:dc='http://purl.org/dc/elements/1.1/'>
+    <dc:type>Carve Report</dc:type>
+  </metadata>
+  <creator>
+    <package>PhotoRec</package>
+    <version>7.1</version>
+    <build_environment>
+      <compiler>GCC 9.2</compiler>
+      <library name='libext2fs' version='1.45.5'/>
+      <library name='libewf' version='none'/>
+      <library name='libjpeg' version='libjpeg-turbo-2.0.2'/>
+      <library name='libntfs' version='libntfs-3g'/>
+      <library name='zlib' version='1.2.11'/>
+    </build_environment>
+    <execution_environment>
+      <os_sysname>Linux</os_sysname>
+      <os_release>5.15.0-86-generic</os_release>
+      <os_version>#96~20.04.1-Ubuntu SMP Thu Sep 21 13:23:37 UTC 2023</os_version>
+      <host>tuetd-Ubuntu</host>
+      <arch>x86_64</arch>
+      <uid>0</uid>
+      <start_time>2023-10-10T16:15:38+0700</start_time>
+    </execution_environment>
+  </creator>
+  <source>
+    <image_filename>/dev/nvme0n1</image_filename>
+    <sectorsize>512</sectorsize>
+    <image_size>256060514304</image_size>
+    <volume>
+      <byte_runs>
+        <byte_run offset='0' img_offset='1048576' len='104857600'/>
+      </byte_runs>
+    </volume>
+  </source>
+  <configuration>
+  </configuration>
+  <fileobject>
+    <filename>f0000012.txt</filename>
+    <filesize>105</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='1054720' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0008194.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='5243904' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0008196.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='5244928' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0008198.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='5245952' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0008200.reg</filename>
+    <filesize>28672</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='5246976' len='28672'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0008256.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='5275648' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0008282_bootmgr_exe</filename>
+    <filesize>1580544</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='5288960' len='1581056'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0011388_bootmgr_exe</filename>
+    <filesize>1564672</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='6879232' len='1564672'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0014464_bootmgr_exe</filename>
+    <filesize>71680</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='8454144' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0014622.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='8535040' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0014650.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='8549376' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0014652_bootmgr_exe</filename>
+    <filesize>71680</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='8550400' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0014810_memdiag_exe</filename>
+    <filesize>36864</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='8631296' len='36864'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0014900_bootmgr_exe</filename>
+    <filesize>70656</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='8677376' len='70656'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0015058.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='8758272' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0015060_bootmgr_exe</filename>
+    <filesize>70656</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='8759296' len='70656'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0015216_memdiag_exe</filename>
+    <filesize>36864</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='8839168' len='36864'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0015462.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='8965120' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0015464_bootmgr_exe</filename>
+    <filesize>74752</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='8966144' len='74752'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0015628_bootmgr_exe</filename>
+    <filesize>74752</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9050112' len='74752'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0015792_memdiag_exe</filename>
+    <filesize>37376</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9134080' len='37888'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0015884.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9181184' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0015886_bootmgr_exe</filename>
+    <filesize>75776</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9182208' len='75776'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0016052_bootmgr_exe</filename>
+    <filesize>75776</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9267200' len='75776'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0016218_memdiag_exe</filename>
+    <filesize>37888</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9352192' len='37888'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0016310.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9399296' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0016312_bootmgr_exe</filename>
+    <filesize>68608</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9400320' len='68608'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0016464_bootmgr_exe</filename>
+    <filesize>68608</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9478144' len='68608'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0016616.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9555968' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0016618_bootmgr_exe</filename>
+    <filesize>68608</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9556992' len='68608'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0016770_bootmgr_exe</filename>
+    <filesize>68608</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9634816' len='68608'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0016922_memdiag_exe</filename>
+    <filesize>36352</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9712640' len='36864'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0017012.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9758720' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0017014_bootmgr_exe</filename>
+    <filesize>72704</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9759744' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0017174_bootmgr_exe</filename>
+    <filesize>72704</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9841664' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0017334_memdiag_exe</filename>
+    <filesize>37376</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9923584' len='37888'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0017424.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9969664' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0017426_bootmgr_exe</filename>
+    <filesize>72704</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='9970688' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0017586_bootmgr_exe</filename>
+    <filesize>72704</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10052608' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0017746.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10134528' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0017748_bootmgr_exe</filename>
+    <filesize>69632</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10135552' len='69632'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0017902_bootmgr_exe</filename>
+    <filesize>69632</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10214400' len='69632'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0018056.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10293248' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0018058_bootmgr_exe</filename>
+    <filesize>71680</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10294272' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0018216_bootmgr_exe</filename>
+    <filesize>71680</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10375168' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0018374_memdiag_exe</filename>
+    <filesize>36864</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10456064' len='36864'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0018464.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10502144' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0018466_bootmgr_exe</filename>
+    <filesize>74240</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10503168' len='74752'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0018628_bootmgr_exe</filename>
+    <filesize>74240</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10586112' len='74752'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0018794.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10671104' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0018796_bootmgr_exe</filename>
+    <filesize>74752</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10672128' len='74752'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0018960_bootmgr_exe</filename>
+    <filesize>74752</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10756096' len='74752'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0019124_memdiag_exe</filename>
+    <filesize>37376</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10840064' len='37888'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0019216.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10887168' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0019218_bootmgr_exe</filename>
+    <filesize>71680</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10888192' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0019376_bootmgr_exe</filename>
+    <filesize>71680</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='10969088' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0019534.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='11049984' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0019536_bootmgr_exe</filename>
+    <filesize>74752</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='11051008' len='74752'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0019700_bootmgr_exe</filename>
+    <filesize>74752</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='11134976' len='74752'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0019864_memdiag_exe</filename>
+    <filesize>37376</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='11218944' len='37888'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0019956.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='11266048' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0019958_bootmgr_exe</filename>
+    <filesize>72192</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='11267072' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0020116_bootmgr_exe</filename>
+    <filesize>72192</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='11347968' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0020276_memdiag_exe</filename>
+    <filesize>36864</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='11429888' len='36864'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0020366.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='11475968' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0020504_bootmgr_exe</filename>
+    <filesize>60928</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='11546624' len='61440'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0020642_memdiag_exe</filename>
+    <filesize>34304</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='11617280' len='34816'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0023142.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='12897280' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0023144_bootmgr_exe</filename>
+    <filesize>60416</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='12898304' len='60416'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0023280_bootmgr_exe</filename>
+    <filesize>60416</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='12967936' len='60416'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0023416_memdiag_exe</filename>
+    <filesize>34304</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='13037568' len='34816'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0023502.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='13081600' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0023504_bootmgr_exe</filename>
+    <filesize>70656</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='13082624' len='70656'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0023660_bootmgr_exe</filename>
+    <filesize>70656</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='13162496' len='70656'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0023816.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='13242368' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0023818_bootmgr_exe</filename>
+    <filesize>70656</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='13243392' len='70656'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0023974_bootmgr_exe</filename>
+    <filesize>70656</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='13323264' len='70656'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0026766.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='14752768' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0026768_bootmgr_exe</filename>
+    <filesize>70144</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='14753792' len='70656'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0026922_bootmgr_exe</filename>
+    <filesize>70144</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='14832640' len='70656'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0027078_memdiag_exe</filename>
+    <filesize>36864</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='14912512' len='36864'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0027168.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='14958592' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0027170_bootmgr_exe</filename>
+    <filesize>72704</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='14959616' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0027330_bootmgr_exe</filename>
+    <filesize>72704</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15041536' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0027490_memdiag_exe</filename>
+    <filesize>36864</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15123456' len='36864'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0027580.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15169536' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0027582_bootmgr_exe</filename>
+    <filesize>73216</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15170560' len='73728'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0027742_bootmgr_exe</filename>
+    <filesize>73216</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15252480' len='73728'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0027902_memdiag_exe</filename>
+    <filesize>37376</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15334400' len='37888'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0027994.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15381504' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0027996_bootmgr_exe</filename>
+    <filesize>71680</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15382528' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0028154_bootmgr_exe</filename>
+    <filesize>71680</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15463424' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0028312_memdiag_exe</filename>
+    <filesize>36864</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15544320' len='36864'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0028402.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15590400' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0028404_bootmgr_exe</filename>
+    <filesize>71680</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15591424' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0028562_bootmgr_exe</filename>
+    <filesize>71680</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15672320' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0028720_memdiag_exe</filename>
+    <filesize>37376</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15753216' len='37888'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0028812.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15800320' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0028814_memdiag_exe</filename>
+    <filesize>45568</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15801344' len='46080'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0028922.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15856640' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0028924_bootmgr_exe</filename>
+    <filesize>71168</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15857664' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0029080_bootmgr_exe</filename>
+    <filesize>71168</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='15937536' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0029238.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16018432' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0029240_bootmgr_exe</filename>
+    <filesize>72192</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16019456' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0029398_bootmgr_exe</filename>
+    <filesize>72192</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16100352' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0029558_memdiag_exe</filename>
+    <filesize>36352</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16182272' len='36864'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0029646.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16227328' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0029648_bootmgr_exe</filename>
+    <filesize>72192</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16228352' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0029806_bootmgr_exe</filename>
+    <filesize>72192</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16309248' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0029966.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16391168' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0029968_bootmgr_exe</filename>
+    <filesize>71168</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16392192' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0030124_bootmgr_exe</filename>
+    <filesize>71168</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16472064' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0030282.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16552960' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0030284_bootmgr_exe</filename>
+    <filesize>72192</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16553984' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0030442_bootmgr_exe</filename>
+    <filesize>72192</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16634880' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0030602.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16716800' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0030604_bootmgr_exe</filename>
+    <filesize>71168</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16717824' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0030760_bootmgr_exe</filename>
+    <filesize>71168</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16797696' len='71680'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0030918_memdiag_exe</filename>
+    <filesize>36352</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16878592' len='36864'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0031008.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16924672' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0031010_bootmgr_exe</filename>
+    <filesize>70656</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='16925696' len='70656'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0031166_bootmgr_exe</filename>
+    <filesize>70656</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='17005568' len='70656'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0031322_memdiag_exe</filename>
+    <filesize>36864</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='17085440' len='36864'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0031412.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='17131520' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0031750.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='17304576' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0031752_bootmgr_exe</filename>
+    <filesize>56320</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='17305600' len='56320'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0031880_bootmgr_exe</filename>
+    <filesize>56320</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='17371136' len='56320'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0032008_memdiag_exe</filename>
+    <filesize>33792</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='17436672' len='33792'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0032092.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='17479680' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0032094_bootmgr_exe</filename>
+    <filesize>56320</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='17480704' len='56320'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0032222_bootmgr_exe</filename>
+    <filesize>56320</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='17546240' len='56320'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0032350_memdiag_exe</filename>
+    <filesize>33792</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='17611776' len='33792'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0032434.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='17654784' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0035482.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='19215360' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0035612.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='19281920' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0035614.ttf</filename>
+    <filesize>3695831</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='19282944' len='3696640'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0042834.ttf</filename>
+    <filesize>3878311</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='22979584' len='3878912'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0050410.ttf</filename>
+    <filesize>1985767</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='26858496' len='1986560'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0054290.ttf</filename>
+    <filesize>2372903</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='28845056' len='2373632'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0058926.ttf</filename>
+    <filesize>175431</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='31218688' len='176128'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0059270.ttf</filename>
+    <filesize>177891</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='31394816' len='178176'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0059618.ttf</filename>
+    <filesize>144019</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='31572992' len='144384'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0059900.ttf</filename>
+    <filesize>145687</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='31717376' len='146432'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0060186.ttf</filename>
+    <filesize>163499</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='31863808' len='163840'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0060506.ttf</filename>
+    <filesize>165527</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32027648' len='165888'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0060830.ttf</filename>
+    <filesize>155439</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32193536' len='155648'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0061134.ttf</filename>
+    <filesize>157067</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32349184' len='157696'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0061442.ttf</filename>
+    <filesize>44763</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32506880' len='45056'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0061532.ttf</filename>
+    <filesize>85767</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32552960' len='86016'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0061700.ttf</filename>
+    <filesize>86079</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32638976' len='87040'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0061870.ttf</filename>
+    <filesize>48995</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32726016' len='49152'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0061966.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32775168' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0061968_bootres</filename>
+    <filesize>83968</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32776192' len='83968'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0062150.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32869376' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0062152_bootres</filename>
+    <filesize>4096</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32870400' len='4096'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0062202.reg</filename>
+    <filesize>49152</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32896000' len='49152'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0062298.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32945152' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0062316.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32954368' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0062318.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32955392' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0062320.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='32956416' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0093006.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='48667648' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0093028_bootmgr_exe</filename>
+    <filesize>60928</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='48678912' len='61440'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0093166_kdnet_uart16550_dll</filename>
+    <filesize>9216</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='48749568' len='9216'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0093204_kdstub_dll</filename>
+    <filesize>18944</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='48769024' len='19456'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0093260_kd_02_10df_dll</filename>
+    <filesize>23040</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='48797696' len='23552'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0093324_kd_02_10ec_dll</filename>
+    <filesize>370688</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='48830464' len='370688'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0094068_kd_02_1137_dll</filename>
+    <filesize>17920</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='49211392' len='18432'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0094122_kd_02_14e4_dll</filename>
+    <filesize>231424</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='49239040' len='231424'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0094594_kd_02_15b3_dll</filename>
+    <filesize>35840</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='49480704' len='35840'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0094684_kd_02_1969_dll</filename>
+    <filesize>35840</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='49526784' len='35840'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0094774_kd_02_19a2_dll</filename>
+    <filesize>23040</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='49572864' len='23552'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0094838_kd_02_1af4_dll</filename>
+    <filesize>11776</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='49605632' len='12288'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0094880_kd_02_8086_dll</filename>
+    <filesize>289792</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='49627136' len='289792'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0095466_kd_07_1415_dll</filename>
+    <filesize>10240</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='49927168' len='10240'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0095506_kd_0C_8086_dll</filename>
+    <filesize>40448</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='49947648' len='40960'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0095604_memdiag_exe</filename>
+    <filesize>1344000</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='49997824' len='1344512'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0098248_bootmgr_exe</filename>
+    <filesize>72192</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='51351552' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0098408_bootmgr_exe</filename>
+    <filesize>72192</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='51433472' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0102200.fat</filename>
+    <filesize>1024</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='53374976' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0102204.xml</filename>
+    <filesize>678</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='53377024' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0102232.xml</filename>
+    <filesize>678</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='53391360' len='1024'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0104862.elf</filename>
+    <filesize>1254400</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='54737920' len='1254400'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0107312.exe</filename>
+    <filesize>891278</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='55992320' len='891904'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0109188.exe</filename>
+    <filesize>802406</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='56952832' len='802816'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0110874.exe</filename>
+    <filesize>891278</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='57816064' len='891904'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0112750.exe</filename>
+    <filesize>80130</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='58776576' len='80896'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0112924.exe</filename>
+    <filesize>802406</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='58865664' len='802816'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0139264_bootmgr_exe</filename>
+    <filesize>72704</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='72351744' len='72704'/>
+    </byte_runs>
+  </fileobject>
+  <fileobject>
+    <filename>f0139424_bootmgr_exe</filename>
+    <filesize>72704</filesize>
+    <byte_runs>
+      <byte_run offset='0' img_offset='72433664' len='72704'/>
+    </byte_runs>
+  </fileobject>
+</dfxml>

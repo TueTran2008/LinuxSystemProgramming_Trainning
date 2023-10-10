@@ -14,16 +14,17 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include "speedtest_utilities.h"
+#include "speedtest.h"
 #include "socket_ip.h"
 #include "socket_http.h"
+#include "utilities.h"
+#include <errno.h>
 /**
  * @brief Path to the directory where files are stored.
  */
 #define FILE_DIRECTORY_PATH "/tmp/"
-/**
- * @brief Number of nearest servers to consider.
- */
-#define NEAREST_SERVERS_NUM 10
+
+
 /**
  * @brief Request URL for servers' location data.
  */
@@ -31,14 +32,32 @@
 
 
 
+/**
+ * @brief Gets system uptime.
+ *
+ * @return Uptime in seconds, -1 on failure.
+ */
+float st_utilities_get_uptime(void) 
+{
+    FILE* fp;
+    float uptime, idle_time;
 
+    if ((fp = fopen("/proc/uptime", "r"))!=NULL) 
+    {
+        fscanf (fp, "%f %f\n", &uptime, &idle_time);
+        fclose (fp);
+        return uptime;
+    }
+    return -1;
+}
 /**
  * @brief Gets the best server based on latency.
  *
  * @param nearest_servers Array of nearest server data.
+ * @param protocol Procotol support by the server
  * @return Index of the best server.
  */
-int st_utilities_get_best_server(server_data_t *nearest_servers) 
+int st_utilities_get_best_server(server_data_t *nearest_servers, st_server_protocol_t protocol) 
 {
     FILE *fp = NULL;
     int i = 0, latency, best_index = -1;
@@ -56,7 +75,6 @@ int st_utilities_get_best_server(server_data_t *nearest_servers)
         char *ptr = NULL;
         memset(latency_url[i], 0, sizeof(latency_url[i]));
         strncpy(url, nearest_servers[i].url, sizeof(nearest_servers[i].url));
-
         ptr = strtok(url, "/");
         while (ptr != NULL) 
         {
@@ -72,15 +90,27 @@ int st_utilities_get_best_server(server_data_t *nearest_servers)
                 strcat(latency_url[i], buf);
                 strcat(latency_url[i], "/");
             }
-
-            if(strstr(buf, "http:")) 
-                strcat(latency_url[i], "/");
+            if (protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
+            {
+                if(strstr(buf, "http:")) 
+                    strcat(latency_url[i], "/");
+            }
+            else if (protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+            {
+                if(strstr(buf, "https:")) 
+                    strcat(latency_url[i], "/");
+            }
 
             ptr = strtok(NULL, "/");
         }
-
-        //Get domain name
-        sscanf(latency_url[i], "http://%[^/]", nearest_servers[i].domain_name);
+        if (protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
+        {
+            sscanf(latency_url[i], "http://%[^/]", nearest_servers[i].domain_name);
+        }
+        else if (protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+        {
+            sscanf(latency_url[i], "https://%[^/]", nearest_servers[i].domain_name);
+        }
 
         //Get request url
         memset(latency_request_url, 0, sizeof(latency_request_url));
@@ -88,10 +118,9 @@ int st_utilities_get_best_server(server_data_t *nearest_servers)
             ptr += strlen(nearest_servers[i].domain_name);
             strncpy(latency_request_url, ptr, strlen(ptr));
         }
-
         if(socket_ipv4_get_from_url(nearest_servers[i].domain_name, "http", &servinfo)) 
         {
-            memcpy(&nearest_servers[i].servinfo, &servinfo, sizeof(struct addrinfo));
+            memcpy(&nearest_servers[i].servinfo, &servinfo, sizeof(servinfo));
             gettimeofday(&tv1, NULL);
             socket_http_get_file((struct sockaddr_in *)servinfo.ai_addr, nearest_servers[i].domain_name, latency_request_url, latency_name);
             gettimeofday(&tv2, NULL);
@@ -126,7 +155,6 @@ int st_utilities_get_best_server(server_data_t *nearest_servers)
         }
         nearest_servers[i].servinfo = servinfo;
     }
-    
     return best_index;
 }
 /**
@@ -200,15 +228,22 @@ int st_utilities_get_nearest_server(double lat_c, double lon_c, server_data_t *n
     if ((fp = fopen(filePath, "r")) != NULL) {
         while (fgets(line, sizeof(line) - 1, fp) != NULL) {
             if (!strncmp(line, "<server", 7)) {
+                
                 sscanf(line, "%*[^\"]\"%127[^\"]\"%*[^\"]\"%63[^\"]\"%*[^\"]\"%63[^\"]\"%*[^\"]\"%127[^\"]\"%*[^\"]\"%127[^\"]\"", url, lat, lon, name, country);
 
                 lat_s = atof(lat);
                 lon_s = atof(lon);
 
                 distance = st_utilities_calc_distance(lat_c, lon_c, lat_s, lon_s);
-
+                
                 for (i = 0; i < NEAREST_SERVERS_NUM; i++)
                 {
+                    if (strstr(url, ":"))
+                    {
+                        char tmp_url[128];
+                        memset(tmp_url, 0, sizeof(tmp_url));
+                        char *p_tmp_url = utilities_strremove(url, ":8080");
+                    }
                     if (nearest_servers[i].url[0] == '\0') 
                     {
                         strncpy(nearest_servers[i].url, url, sizeof(nearest_servers[i].url));
@@ -247,6 +282,36 @@ int st_utilities_get_nearest_server(double lat_c, double lon_c, server_data_t *n
         }
         fclose(fp);
     }
-
     return (count > 0) ? 1 : 0;
+}
+
+int st_utilities_get_server_through_domain_name(char *p_server_name, st_server_protocol_t protocol, server_data_t *p_target_server)
+{
+    struct addrinfo servinfo;
+    if(p_server_name == NULL)
+    {
+        printf("%s: Input server is NULL", __FUNCTION__);
+        return -1;
+    }
+    if(socket_ipv4_get_from_url(p_server_name, "http", &servinfo) == 0) 
+    {
+        printf("Errno when resolse ip - errno:%s\r\n", strerror(errno));
+        return -1;
+    }
+    memcpy(&p_target_server->servinfo, &servinfo, sizeof(servinfo));
+    memcpy(&p_target_server->domain_name, p_server_name, strlen(p_server_name));
+    if(protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
+    {
+        sprintf(p_target_server->url, "http://%s/speedtest/upload.php", p_target_server->domain_name);
+    }
+    else if (protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        sprintf(p_target_server->url, "https://%s/speedtest/upload.php", p_target_server->domain_name);
+    }
+    else
+    {
+        printf("Invalid protocol");
+        return -1;
+    }
+    return 0;
 }

@@ -15,6 +15,8 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include "app_debug.h"
+#include <errno.h>
+#include "socket_http.h"
 
 /**
  * @brief Macro for verbose debugging messages.
@@ -77,7 +79,7 @@ int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *requ
     memset(sbuf, 0, sizeof(sbuf));
     memset(tmp_path, 0, sizeof(tmp_path));
     memset(rbuf, 0, sizeof(sbuf));
-    DEBUG_INFO("%s: Sin family:%d\r\n", __FUNCTION__, serv->sin_family);
+    DEBUG_SOCKET_HTTP_VERBOSE("%s: Sin family:%d\r\n", __FUNCTION__, serv->sin_family);
     if ((fd = socket(serv->sin_family, SOCK_STREAM, 0)) == -1) 
     {
         DEBUG_SOCKET_HTTP_ERROR("Open socket error!\n");
@@ -89,7 +91,7 @@ int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *requ
     }
     if (connect(fd, (struct sockaddr *)serv, sizeof(struct sockaddr)) == -1) 
     {
-        DEBUG_SOCKET_HTTP_ERROR("Socket connect error!\n");
+        DEBUG_SOCKET_HTTP_ERROR("%s: Socket connect error!\r\nDomain: %s - errno: %s\r\n", __FUNCTION__, domain_name, strerror(errno));
         if (fd) 
         {
             close(fd);
@@ -111,7 +113,7 @@ int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *requ
     DEBUG_SOCKET_HTTP_INFO("%s: HTTP Get:\r\n****************************************\r\n%s\r\n****************************************\r\n", __FUNCTION__, sbuf);
     sprintf(tmp_path, "%s%s", FILE_DIRECTORY_PATH, filename);
     DEBUG_SOCKET_HTTP_INFO("%s: HTTP get directory: %s\r\n", __FUNCTION__, tmp_path);
-    fp = fopen(tmp_path, "w+");
+    fp = fopen(tmp_path, "r");
     /*Perform non blocking IO read*/
     while(1) 
     {

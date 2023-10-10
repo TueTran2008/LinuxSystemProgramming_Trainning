@@ -16,6 +16,10 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <errno.h>
+#include "speedtest_utilities.h"
+#include "socket_ip.h"
+#include "socket_http.h"
 
 
 /**
@@ -75,24 +79,7 @@ long int total_dl_size = 0, total_ul_size = 0;
 
 static int thread_all_stop = 0;
 
-/**
- * @brief Gets system uptime.
- *
- * @return Uptime in seconds, -1 on failure.
- */
-static float get_uptime(void) 
-{
-    FILE* fp;
-    float uptime, idle_time;
 
-    if ((fp = fopen("/proc/uptime", "r"))!=NULL) 
-    {
-        fscanf (fp, "%f %f\n", &uptime, &idle_time);
-        fclose (fp);
-        return uptime;
-    }
-    return -1;
-}
 /**
  * @brief Download thread function.
  *
@@ -115,7 +102,8 @@ static void *download_thread(void *arg)
         goto err;
     }
     if (connect(fd, (struct sockaddr *)t_arg->servinfo.ai_addr, sizeof(struct sockaddr)) == -1) {
-        DEBUG_SPEEDTEST_ERROR("Socket connect error!\n");
+        DEBUG_SPEEDTEST_ERROR("Socket connect error!\n - errno:%s\r\n", strerror(errno));
+        sleep(1);
         goto err;
     }
     sprintf(sbuf,
@@ -184,13 +172,16 @@ static void *upload_thread(void *arg)
 
     memset(data, 0, sizeof(char) * UL_BUFFER_SIZE);
 
-    if((fd = socket(t_arg->servinfo.ai_family, SOCK_STREAM, 0)) == -1) {                                                  
+    if((fd = socket(t_arg->servinfo.ai_family, SOCK_STREAM, 0)) == -1) 
+    {      
+        sleep(1);                                     
         DEBUG_SPEEDTEST_ERROR("Open socket error!\n");
         goto err;
     }
 
     if (connect(fd, (struct sockaddr *)t_arg->servinfo.ai_addr, sizeof(struct sockaddr)) == -1){
-        DEBUG_SPEEDTEST_ERROR("Socket connect error!\n");
+        DEBUG_SPEEDTEST_ERROR("Socket connect error!\n - errno:%s\r\n", strerror(errno));
+        sleep(1);
         goto err;
     }
 
@@ -264,7 +255,7 @@ void *calculate_ul_speed_thread()
     double ul_speed = 0.0, duration = 0;
     while(1) 
     {
-        stop_ul_time = get_uptime();
+        stop_ul_time = st_utilities_get_uptime();
         duration = stop_ul_time-start_ul_time;
         ul_speed = (double)total_ul_size /1000 /1000 /duration *8;
         if(duration>0) {
@@ -275,7 +266,7 @@ void *calculate_ul_speed_thread()
 
         if (thread_all_stop) 
         {
-            stop_ul_time = get_uptime();
+            stop_ul_time = st_utilities_get_uptime();
             duration = stop_ul_time-start_ul_time;
             //ul_speed = (double)total_ul_size/1024/1024/duration*8;
             ul_speed = (double)total_ul_size/1000/1000/duration*8;
@@ -301,7 +292,7 @@ static void *calculate_dl_speed_thread(void *arg)
     double dl_speed = 0.0, duration = 0;
     while(1) 
     {
-        stop_dl_time = get_uptime();
+        stop_dl_time = st_utilities_get_uptime();
         //printf("Stop download time: %f\r\n", stop_dl_time);
         duration = stop_dl_time - start_dl_time;
         dl_speed = (double)total_dl_size / 1000 / 1000 / duration * 8;
@@ -313,7 +304,7 @@ static void *calculate_dl_speed_thread(void *arg)
         usleep(500000);
         if(thread_all_stop) 
         {
-            stop_dl_time = get_uptime();
+            stop_dl_time = st_utilities_get_uptime();
             duration = stop_dl_time-start_dl_time;
             //dl_speed = (double)total_dl_size/1024/1024/duration*8;
             dl_speed = (double)total_dl_size/1000/1000/duration*8;
@@ -387,8 +378,8 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
         }
         ptr = strtok(NULL, "/");
     }
-    DEBUG_SPEEDTEST_INFO("%s: request_url:%s\r\n", __FUNCTION__, request_url);
-    start_dl_time = get_uptime();
+    DEBUG_SPEEDTEST_INFO("%s: request_url:%s - url: %s\r\n", __FUNCTION__, request_url, nearest_server->url);
+    start_dl_time = st_utilities_get_uptime();
     while(1) 
     {
         for(i = 0; i < number_of_thread; i++) 
@@ -416,18 +407,18 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
 /**
  * @brief Initiates speed test upload.
  *
- * @param nearest_server Pointer to the nearest server data.
+ * @param test_server Pointer to the nearest server data.
  * @param number_of_thread Number of threads to use for upload.
  * @return 1 on success, -1 on failure.
  */
-int speedtest_upload(server_data_t *nearest_server, unsigned int number_of_thread) 
+int speedtest_upload(server_data_t *test_server, unsigned int number_of_thread) 
 {
     int i;
     char dummy[128]={0}, request_url[128]={0};
-    sscanf(nearest_server->url, "http://%[^/]/%s", dummy, request_url);
-    start_ul_time = get_uptime();
+    sscanf(test_server->url, "http://%[^/]/%s", dummy, request_url);
+    start_ul_time = st_utilities_get_uptime();
     pthread_t calculate_thread;
-    if (nearest_server == NULL)
+    if (test_server == NULL)
     {
         DEBUG_SPEEDTEST_ERROR("%s: Nearest server is NULL\r\n");
         return -1;
@@ -449,8 +440,8 @@ int speedtest_upload(server_data_t *nearest_server, unsigned int number_of_threa
     {
         for(i = 0; i < number_of_thread; i++) 
         {
-            memcpy(&up_thread_data[i].servinfo, &nearest_server->servinfo, sizeof(up_thread_data[i].servinfo));
-            memcpy(up_thread_data[i].domain_name, nearest_server->domain_name, sizeof(nearest_server->domain_name));
+            memcpy(&up_thread_data[i].servinfo, &test_server->servinfo, sizeof(up_thread_data[i].servinfo));
+            memcpy(up_thread_data[i].domain_name, test_server->domain_name, sizeof(test_server->domain_name));
             memcpy(up_thread_data[i].request_url, request_url, sizeof(request_url));
             if(up_thread_data[i].running == 0) 
             {
@@ -478,4 +469,106 @@ void speedtest_stop_all_thread(int signo)
         thread_all_stop=1;
     }
     return;
+}
+/**
+ * @brief Performs a Speedtest on a specific domain name using the given protocol, operation, and number of threads.
+ *
+ * @param p_domain_name The domain name to perform the Speedtest on.
+ * @param protocol The protocol to be used for the Speedtest (e.g., HTTP, HTTPS).
+ * @param operation The type of Speedtest operation (e.g., upload, download).
+ * @param number_of_thread Number of threads to be used for the Speedtest.
+ * @return 0 if the Speedtest is successful, -1 on failure.
+ */
+int speedtest_test_domain_name(char *p_domain_name, st_server_protocol_t protocol, st_server_operation_t operation, int number_of_thread)
+{
+    int ret = 0;
+    server_data_t server_data;
+    if (p_domain_name == NULL)
+    {
+        DEBUG_SPEEDTEST_ERROR("Error when get domain name server\r\n");
+        return - 1;
+    }
+    ret = st_utilities_get_server_through_domain_name(p_domain_name, protocol, &server_data);
+    if(ret == -1)
+    {
+        DEBUG_SPEEDTEST_ERROR("%s:Error when get server datar\r\n", __FUNCTION__);
+        return -1;
+    }
+    if(operation == SPEEDTEST_SERVER_OPERATION_UPLOAD)
+    {
+        speedtest_upload(&server_data, number_of_thread);
+    }
+    else if (operation == SPEEDTEST_SERVER_OPERATION_DOWNLOAD)
+    {
+        speedtest_download(&server_data, number_of_thread);
+    }
+}
+/**
+ * @brief Performs a Speedtest on the server with the lowest latency using the given protocol, operation, and number of threads.
+ *
+ * @param protocol The protocol to be used for the Speedtest (e.g., HTTP, HTTPS).
+ * @param operation The type of Speedtest operation (e.g., upload, download).
+ * @param number_of_thread Number of threads to be used for the Speedtest.
+ * @return 0 if the Speedtest is successful, -1 on failure.
+ */
+int speedtest_test_lowest_latency(st_server_protocol_t protocol, st_server_operation_t operation, int number_of_thread)
+{
+    int i, best_server_index;
+    client_data_t client_data;
+    server_data_t nearest_servers[NEAREST_SERVERS_NUM];
+    pthread_t pid;
+    struct addrinfo servinfo;
+    struct itimerval timerVal;
+    memset(&client_data, 0, sizeof(client_data_t));
+    for (i = 0; i < NEAREST_SERVERS_NUM; i++) 
+    {
+        memset(&nearest_servers[i], 0, sizeof(server_data_t));
+    }
+    if (socket_ipv4_get_from_url(SPEEDTEST_DOMAIN_NAME, "http", &servinfo)) 
+    {
+        if (!socket_http_get_file((struct sockaddr_in *)servinfo.ai_addr, SPEEDTEST_DOMAIN_NAME, CONFIG_REQUEST_URL, CONFIG_REQUEST_URL)) 
+        {
+            DEBUG_ERROR("Can't get your IP address information.\n");
+            return -1;
+        }
+    }
+    if(socket_ipv4_get_from_url(SPEEDTEST_SERVERS_DOMAIN_NAME, "http", &servinfo)) 
+    {
+        if(!socket_http_get_file((struct sockaddr_in *)servinfo.ai_addr, SPEEDTEST_SERVERS_DOMAIN_NAME, SERVERS_LOCATION_REQUEST_URL, SERVERS_LOCATION_REQUEST_URL)) {
+            DEBUG_ERROR("Can't get servers list.\n");
+            return -1;
+        }
+    }
+    st_utilities_get_ip_address_position(CONFIG_REQUEST_URL, &client_data);
+    DEBUG_SPEEDTEST_VERBOSE("============================================\n");
+    DEBUG_SPEEDTEST_VERBOSE("Your IP Address : %s\n", client_data.ipAddr);
+    DEBUG_SPEEDTEST_VERBOSE("Your ISP        : %s\n", client_data.isp);
+    DEBUG_SPEEDTEST_VERBOSE("============================================\n");
+    if(st_utilities_get_nearest_server(client_data.latitude, client_data.longitude, nearest_servers) == 0) 
+    {
+        DEBUG_SPEEDTEST_VERBOSE("Can't get server list.\n"); 
+        return -1;
+    }
+    if((best_server_index = st_utilities_get_best_server(nearest_servers, SPEEDTEST_SERVER_PROCOTOL_HTTP)) != -1) 
+    {
+        DEBUG_SPEEDTEST_VERBOSE("==========The best server information==========\n");
+        DEBUG_SPEEDTEST_VERBOSE("URL: %s - index:%d\n", nearest_servers[best_server_index].url, best_server_index);
+        DEBUG_SPEEDTEST_VERBOSE("Name: %s\n", nearest_servers[best_server_index].name);
+        DEBUG_SPEEDTEST_VERBOSE("Country: %s\n", nearest_servers[best_server_index].country);
+        DEBUG_SPEEDTEST_VERBOSE("===============================================\n");
+        if(operation == SPEEDTEST_SERVER_OPERATION_UPLOAD)
+        {
+            speedtest_upload(&nearest_servers[best_server_index], number_of_thread);
+            
+        }
+        else if (operation == SPEEDTEST_SERVER_OPERATION_DOWNLOAD)
+        {
+            speedtest_download(&nearest_servers[best_server_index], number_of_thread);
+        }
+        else
+        {
+            DEBUG_SPEEDTEST_ERROR("Invalid operation\r\n");
+        }
+    }
+    return 0;
 }

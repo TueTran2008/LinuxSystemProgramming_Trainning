@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include "app_debug.h"
+#include "socket_ip.h"
 
 #if (DEBUG_LEVEL_VERBOSE >= DEBUG_SOCKET_IP_LEVEL)
 #define DEBUG_SOCKET_IP_VERBOSE(format_, ...)  DEBUG_VERBOSE(format_, ##__VA_ARGS__)
@@ -96,7 +97,7 @@ int socket_ipv4_get_from_url(char *p_input_server_name, char *p_port, struct add
     }
     else
     {
-        DEBUG_SOCKET_IP_INFO("Resolve DNS Successfully(%s) -- errno: %d\n", p_input_server_name, errno);
+        DEBUG_SOCKET_IP_VERBOSE("Resolve DNS Successfully(%s) -- errno: %d\n", p_input_server_name, errno);
     }
     for (rp = result; rp != NULL; rp = rp->ai_next) 
     {

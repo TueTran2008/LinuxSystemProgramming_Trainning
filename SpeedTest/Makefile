@@ -10,6 +10,9 @@ SRC += source/speedtest/*.c
 INC += -I./source/user_app/user_app/old_app_debug
 SRC += source/user_app/user_app/old_app_debug/*.c
 
+INC += -I./source/user_app/user_app/utilities/include
+SRC += source/user_app/user_app/utilities/*.c
+
 all: main.c $(SRC)
 	$(CC) $(INC) main.c $(SRC) -lpthread -lm -o speedtest
 
@@ -24,4 +27,4 @@ debug_gdb: main.c.c $(SRC)
 	rm -rf gdb_debug
 
 clean:
-	rm -rf main.c debug gdb_debug
+	rm -rf main debug gdb_debug
