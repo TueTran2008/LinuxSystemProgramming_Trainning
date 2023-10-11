@@ -176,7 +176,9 @@ int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *requ
 }
 
 
-
+/**
+ * @brief Function test the HTTP operation
+*/
 int https_test(void)
 {
     struct addrinfo servinfo;
@@ -289,11 +291,6 @@ int socket_https_get_file(struct sockaddr_in *serv, char *domain_name, char *req
 
     X509_free(server_cert);
 
-    // sprintf(host_header,"Host: %s\r\n", "www.speedtest.net");
-    // strcpy(output_buf,"GET /sppedtest-config.php HTTP/1.0\r\n");
-    // strcat(output_buf,host_header);
-    // strcat(output_buf,"Connection: close\r\n");
-    // strcat(output_buf,"\r\n");
     sprintf(output_buf,
             "GET /%s HTTP/1.0\r\n"
             "Host: %s\r\n"

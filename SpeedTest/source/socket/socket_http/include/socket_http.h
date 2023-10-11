@@ -31,7 +31,23 @@
  */
 int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *request_url, char *filename);
 
+/**
+ * @brief Performs an HTTPS GET request and saves the response to a file.
+ *
+ * This function establishes a secure HTTPS connection to the specified server and sends an HTTP GET request for
+ * the provided `request_url`. It saves the received response to the file specified by `filename`.
+ * The function uses non-blocking IO to read data from the server and writes it to the file.
+ *
+ * @param serv Pointer to a sockaddr_in structure representing the server address.
+ * @param domain_name The domain name of the server.
+ * @param request_url The URL to request from the server.
+ * @param filename The name of the file to save the HTTP response.
+ * @return 1 if the HTTPS request is successful and the response is saved, 0 otherwise.
+ */
 int socket_https_get_file(struct sockaddr_in *serv, char *domain_name, char *request_url, char *filename);
 
+/**
+ * @brief Function test the HTTP operation
+*/
 int https_test(void);
 #endif
