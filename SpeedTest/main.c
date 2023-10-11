@@ -131,6 +131,9 @@ int main(int argc, char *argv[])
 {
     app_debug_register_callback_print(app_puts); /*Install callback print function*/
     app_debug_init(app_get_ms, app_lock);
+
+    https_test();
+    return 0;
     if (argc < 2)
     {
         int ret = 0;

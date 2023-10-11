@@ -103,7 +103,7 @@ int socket_ipv4_get_from_url(char *p_input_server_name, char *p_port, struct add
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_INET;                /* Allows IPv4 or IPv6 */
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_protocol = 0;
+    //hints.ai_protocol = 0;
     if (getaddrinfo(p_input_server_name, p_port, &hints, &result) != 0)
     {
         DEBUG_SOCKET_IP_ERROR("Resolve DNS Failed: Can't get ip address! (%s) -- errno: %d\n", p_input_server_name, errno);

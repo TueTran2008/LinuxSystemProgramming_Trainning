@@ -557,6 +557,8 @@ int speedtest_test_lowest_latency(st_server_protocol_t protocol, st_server_opera
     pthread_t pid;
     struct addrinfo servinfo;
     struct itimerval timerVal;
+    char operation_buf[24];
+    memset(operation_buf, 0, sizeof(operation_buf));
     memset(&client_data, 0, sizeof(client_data_t));
     for (i = 0; i < NEAREST_SERVERS_NUM; i++) 
     {

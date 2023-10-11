@@ -1,3 +1,6 @@
 [submodule "SpeedTest/source/user_app/user_app"]
 	path = SpeedTest/source/user_app/user_app
 	url = https://github.com/TueTran2008/user_app
+[submodule "SpeedTest/SpeedTest/source/openssl/openssl"]
+	path = SpeedTest/SpeedTest/source/openssl/openssl
+	url = https://github.com/openssl/openssl

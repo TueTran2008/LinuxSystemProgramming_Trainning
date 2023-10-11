@@ -22,6 +22,13 @@
 #include <sys/stat.h>
 #include <fcntl.h> 
 
+/*Supprot HTTPS protocol*/
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 /**
  * @brief Macro for verbose debugging messages.
  */
@@ -166,4 +173,162 @@ int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *requ
     close(fd);
     fclose(fp);
     return 1;
+}
+
+
+
+int https_test(void)
+{
+    struct addrinfo servinfo;
+    char p_server_name[] = "www.speedtest.net";
+    memset(&servinfo, 0, sizeof(servinfo));
+    if(socket_ipv4_get_from_url(p_server_name, "https", &servinfo) == 0) 
+    {
+        printf("Errno when resolse ip - errno:%s\r\n", strerror(errno));
+        return -1;
+    }
+    socket_https_get_file((struct sockaddr_in *)servinfo.ai_addr, p_server_name, p_server_name, p_server_name);
+}
+
+int socket_https_get_file(struct sockaddr_in *serv, char *domain_name, char *request_url, char *filename) 
+{
+
+    int fd;
+    SSL *ssl = NULL;
+    SSL_CTX *ctx = NULL;
+    SSL_METHOD *client_method = NULL;
+    X509 *server_cert = NULL;
+    char *str, *host_name, output_buf[4096], input_buf[4096], host_header[512];
+    struct hostent *host_entry = NULL;
+    struct sockaddr_in server_socket_address;
+    struct in_addr ip;
+
+    memset(output_buf, 0, sizeof(output_buf));
+    memset(input_buf, 0, sizeof(input_buf));
+    memset(host_header, 0, sizeof(host_header));
+    memset(&ip, 0, sizeof(struct in_addr));
+
+    /*========================================*/
+    /* (1) initialize SSL library */
+    /*========================================*/
+
+    /*=============================================*/
+    /* (2) convert server hostname into IP address */
+    /*=============================================*/
+    if ((fd = socket(serv->sin_family, SOCK_STREAM, 0)) == -1) 
+    {
+        DEBUG_SOCKET_HTTP_ERROR("Open socket error!\n - errno: %s\r\n", strerror(errno));
+        if (fd)
+        {
+            close(fd);
+        }
+        return 0;
+    };
+    int ret = connect(fd, (struct sockaddr*)serv, sizeof(struct sockaddr_in));
+    if(ret < 0)
+    {
+        DEBUG_SOCKET_HTTP_ERROR("Cannot connect to server port - errno: %s\r\n", strerror(errno));
+    }
+    DEBUG_SOCKET_HTTP_VERBOSE("(3) TCP connection open to host '%s', port:%d\n\n", domain_name, serv->sin_port); 
+    /*========================================================
+    */
+    /* (4) initiate the SSL handshake over the TCP connection
+    */
+
+    /*========================================================*/ 
+    SSLeay_add_ssl_algorithms();
+    client_method = SSLv23_client_method();
+    SSL_load_error_strings();
+    ctx = SSL_CTX_new(client_method); 
+    if(ctx == NULL)
+    {
+        DEBUG_SOCKET_HTTP_ERROR("Cannot create certificate ctx\r\n");
+    }
+    DEBUG_SOCKET_HTTP_VERBOSE("(1) SSL context initialized\n\n");
+    ssl = SSL_new(ctx); /* create SSL stack endpoint*/
+    if(ssl == NULL)
+    {
+        DEBUG_SOCKET_HTTP_ERROR("Cannot create certificate ssl\r\n");
+    }
+
+    SSL_set_fd(ssl, fd); /* attach SSL stack to socket
+    */
+    ret = SSL_connect(ssl); /* initiate SSL handshake */ 
+    DEBUG_SOCKET_HTTP_VERBOSE("(4) SSL endpoint created & handshake completed\n\n");
+
+    /*============================================*/
+    /* (5) print out the negotiated cipher chosen */
+    /*============================================*/
+
+    printf("(5) SSL connected with cipher: %s\n\n",
+    SSL_get_cipher(ssl));
+    if(SSL_get_cipher(ssl) == NULL)
+    {
+        DEBUG_SOCKET_HTTP_VERBOSE("Cannot get cirpher \r\n");
+    }
+    /*========================================*/
+    /* (6) print out the server's certificate */
+    /*========================================*/
+
+    server_cert = SSL_get_peer_certificate(ssl);
+    
+    if(server_cert == NULL)
+    {
+        DEBUG_SOCKET_HTTP_VERBOSE("Cannot get cirpher X509 \r\n");
+    }
+
+    DEBUG_SOCKET_HTTP_VERBOSE("(6) server's certificate was received:\n\n");
+
+    str = X509_NAME_oneline(X509_get_subject_name(server_cert), 0, 0);
+    DEBUG_SOCKET_HTTP_VERBOSE(" subject: %s\n", str);
+
+    str = X509_NAME_oneline(X509_get_issuer_name(server_cert), 0, 0);
+    DEBUG_SOCKET_HTTP_VERBOSE(" issuer: %s\n\n", str);
+
+    /* certificate verification would happen here */
+
+    X509_free(server_cert);
+
+    // sprintf(host_header,"Host: %s\r\n", "www.speedtest.net");
+    // strcpy(output_buf,"GET /sppedtest-config.php HTTP/1.0\r\n");
+    // strcat(output_buf,host_header);
+    // strcat(output_buf,"Connection: close\r\n");
+    // strcat(output_buf,"\r\n");
+    sprintf(output_buf,
+            "GET /%s HTTP/1.0\r\n"
+            "Host: %s\r\n"
+            "User-Agent: status\r\n"
+            "Accept: */*\r\n\r\n", "speedtest-config.php", domain_name);  
+
+    ret = SSL_write(ssl, output_buf, strlen(output_buf));
+    //shutdown (fd, 1); /* send EOF to server */
+
+    DEBUG_SOCKET_HTTP_VERBOSE("(7) sent HTTP request over encrypted channel:\n\n%s\n", output_buf);
+
+    /**************************************************/
+    /* (8) read back HTTP response from the SSL stack */
+    /**************************************************/
+
+    ret = SSL_read(ssl, input_buf, sizeof(input_buf) - 1);
+    //input_buf[ret] = '\0';
+    if(ret == 0)
+    {
+        printf("No response\r\n");
+    }
+    else
+    {
+        printf("ret%d\r\n", ret);
+    }
+    DEBUG_SOCKET_HTTP_VERBOSE("(8) got back %d bytes of HTTP response:\n\n%s\n", ret, input_buf);
+
+    /************************************************/
+    /* (9) all done, so close connection & clean up */
+    /************************************************/
+
+    SSL_shutdown(ssl);
+    close (fd);
+    SSL_free (ssl);
+    SSL_CTX_free (ctx);
+
+    DEBUG_SOCKET_HTTP_VERBOSE("(9) all done, cleaned up and closed connection\n\n"); 
 }
