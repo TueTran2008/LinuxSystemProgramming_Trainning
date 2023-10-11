@@ -185,6 +185,15 @@ int main(int argc, char *argv[])
                 m_test_only_download = true;
             }
         }
+        else if(strcmp(argv[i], "HTTPS") == 0)
+        {
+            protocol = SPEEDTEST_SERVER_PROTOCOL_HTTPS;
+        }
+        else if(strcmp(argv[i], "HTTP") == 0)
+        {
+            protocol = SPEEDTEST_SERVER_PROCOTOL_HTTP;
+        }
+
     }
     if (m_test_only_download)
     {
