@@ -66,7 +66,7 @@ static void print_help(void)
               "--help - Show this help\r\n"
               "--download_testing - Run only download testing\r\n"
               "--upload_testing - Run only upload testing\r\n"
-              "--server URL - Sse server URL instead of reading config\r\n"
+              "--server URL - Test server URL instead of the lowest latancy\r\n"
               "--thread N - Run test with N threads\r\n"
               "HTTP - Use HTTP protocol\r\n"
               "HTTPS - Use HTTPS protocol\r\n"
