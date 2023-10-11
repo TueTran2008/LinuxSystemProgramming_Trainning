@@ -1,3 +1,11 @@
+/**
+ * @file main.c
+ *
+ * @brief SpeedTest Application
+ *
+ * This application performs network speed tests by measuring upload and download
+ * speeds using specified server(s).
+ */
 #include "socket_ip.h"
 #include "socket_http.h"
 #include "speedtest.h"
@@ -11,16 +19,47 @@
 #include <stdbool.h>
 
 
+/**
+ * @brief Structure to store time values.
+ */
 static struct timeval tv;
+/**
+ * @brief Mutex for thread synchronization.
+ */
 static pthread_mutex_t app_debug_mutex = PTHREAD_MUTEX_INITIALIZER;
+/**
+ * @brief Default protocol for the speed test.
+ */
 static st_server_protocol_t protocol = SPEEDTEST_SERVER_PROCOTOL_HTTP;
+/**
+ * @brief Default operation for the speed test.
+ */
 static st_server_operation_t operation = SPEEDTEST_SERVER_OPERATION_UPLOAD;
+/**
+ * @brief Default number of threads for the speed test.
+ */
 static unsigned int number_of_thread = 3;
+/**
+ * @brief Flag to indicate if a custom server URL is provided.
+ */
 static bool perform_server_url = false;
+/**
+ * @brief Custom server URL provided by the user.
+ */
 static char *p_server_url = NULL;
+/**
+ * @brief Flag to indicate if only upload testing is performed.
+ */
 static bool  m_test_only_upload = false;
+/**
+ * @brief Flag to indicate if only download testing is performed.
+ */
 static bool  m_test_only_download = false;
-
+/**
+ * @brief Prints program usage information.
+ *
+ * This function prints the usage instructions for the speed test application.
+ */
 static void print_help(void)
 {
     DEBUG_INFO("Usage (options are case sensitive):"
@@ -31,7 +70,11 @@ static void print_help(void)
     
     );
 }
-
+/**
+ * @brief Gets the current timestamp in milliseconds.
+ *
+ * @return Current timestamp in milliseconds.
+ */
 static uint32_t app_get_ms(void)
 {
     gettimeofday(&tv, NULL);
@@ -40,12 +83,27 @@ static uint32_t app_get_ms(void)
         (unsigned long long)(tv.tv_usec) / 1000;
     return millisecondsSinceEpoch;
 }
-
+/**
+ * @brief Writes data to stdout.
+ *
+ * @param buffer Pointer to the data buffer.
+ * @param len Length of the data.
+ *
+ * @return Number of bytes written.
+ */
 static unsigned int app_puts(const void *buffer, uint32_t len)
 {
     fwrite(buffer, 1, len, stdout);
     return len;
 }
+/**
+ * @brief Acquires or releases a mutex lock.
+ *
+ * @param lock If true, acquires the lock. If false, releases the lock.
+ * @param timeout The maximum time (in milliseconds) to wait for the lock.
+ *
+ * @return True if the lock operation is successful, false otherwise.
+ */
 static bool app_lock(bool lock, uint32_t timeout)
 {
     (void)timeout; /*Lock forever this case*/
@@ -58,7 +116,14 @@ static bool app_lock(bool lock, uint32_t timeout)
         return pthread_mutex_unlock(&app_debug_mutex);
     }
 }
-
+/**
+ * @brief Main function of the speed test application.
+ *
+ * @param argc Number of command-line arguments.
+ * @param argv Array of command-line argument strings.
+ *
+ * @return 0 on successful execution, non-zero on failure.
+ */
 int main(int argc, char *argv[])
 {
     app_debug_register_callback_print(app_puts); /*Install callback print function*/
