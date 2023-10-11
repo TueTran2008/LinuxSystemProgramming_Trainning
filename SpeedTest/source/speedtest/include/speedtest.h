@@ -17,6 +17,7 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include "app_debug.h"
 /**
  * @brief Data structure representing thread information for speed test operations.
  */
@@ -56,7 +57,7 @@ typedef struct {
 /**
  * @brief Log debugging level of the source file
  */
-#define DEBUG_SPEEDTEST_LEVEL 2
+#define DEBUG_SPEEDTEST_LEVEL DEBUG_LEVEL_ERROR
 /**
  * @brief Number of nearest servers to consider.
  */
@@ -81,6 +82,10 @@ typedef struct {
  * @brief Request URL for retrieving Speedtest servers' location data.
  */
 #define SERVERS_LOCATION_REQUEST_URL "speedtest-servers-static.php?"
+/**
+ * @brief Dureation in second for each speed test task
+ */
+#define SPEEDTEST_DURATION 3
 
 
 /**
@@ -97,8 +102,8 @@ typedef enum
  */
 typedef enum
 {
-    SPEEDTEST_SERVER_OPERATION_UPLOAD = 0, /**< Upload data test. */
-    SPEEDTEST_SERVER_OPERATION_DOWNLOAD,    /**< Download data test. */
+    SPEEDTEST_SERVER_OPERATION_UPLOAD = 1, /**< Upload data test. */
+    SPEEDTEST_SERVER_OPERATION_DOWNLOAD = 2,    /**< Download data test. */
     SPEEDTEST_SERVER_OPERATION_MAX
 } st_server_operation_t;
 /**

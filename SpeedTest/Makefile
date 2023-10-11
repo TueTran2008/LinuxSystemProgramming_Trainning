@@ -4,6 +4,9 @@ SRC += source/socket/socket_http/*.c
 INC += -I./source/socket/socket_ip/include
 SRC += source/socket/socket_ip/*.c
 
+INC += -I./source/socket/socket_utilities/include
+SRC += source/socket/socket_utilities/*.c
+
 INC += -I./source/speedtest/include
 SRC += source/speedtest/*.c
 

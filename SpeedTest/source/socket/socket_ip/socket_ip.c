@@ -19,22 +19,36 @@
 #include <errno.h>
 #include "app_debug.h"
 #include "socket_ip.h"
+#include <stdlib.h>
+#include <fcntl.h>
 
+/**
+ * @brief Macro for verbose debugging messages.
+ */
 #if (DEBUG_LEVEL_VERBOSE >= DEBUG_SOCKET_IP_LEVEL)
 #define DEBUG_SOCKET_IP_VERBOSE(format_, ...)  DEBUG_VERBOSE(format_, ##__VA_ARGS__)
 #else
 #define DEBUG_SOCKET_IP_VERBOSE(format_, ...) (void)(0)
 #endif
+/**
+ * @brief Macro for information debugging messages.
+ */
 #if (DEBUG_LEVEL_INFO >= DEBUG_SOCKET_IP_LEVEL)
 #define DEBUG_SOCKET_IP_INFO(format_, ...)  DEBUG_INFO(format_, ##__VA_ARGS__)
 #else
 #define DEBUG_SOCKET_IP_INFO(format_, ...) (void)(0)
 #endif
+/**
+ * @brief Macro for error debugging messages.
+ */
 #if (DEBUG_LEVEL_ERROR >= DEBUG_SOCKET_IP_LEVEL)
 #define DEBUG_SOCKET_IP_ERROR(format_, ...)  DEBUG_ERROR(format_, ##__VA_ARGS__)
 #else
 #define DEBUG_SOCKET_IP_ERROR(format_, ...) (void)(0)
 #endif
+/**
+ * @brief Macro for raw debugging messages.
+ */
 #if (DEBUG_LEVEL_RAW >= DEBUG_SOCKET_IP_LEVEL)
 #define DEBUG_SOCKET_IP_RAW(format_, ...)  DEBUG_RAW(format_, ##__VA_ARGS__)
 #else
@@ -110,3 +124,5 @@ int socket_ipv4_get_from_url(char *p_input_server_name, char *p_port, struct add
     freeaddrinfo(result);
     return 1;
 }
+
+

@@ -79,7 +79,19 @@ long int total_dl_size = 0, total_ul_size = 0;
 
 static int thread_all_stop = 0;
 
-
+/**
+ * @brief Handles SIGALRM signal to stop all threads.
+ *
+ * @param signo Signal number.
+ */
+static void speedtest_stop_all_thread(int signo) 
+{
+    if (signo == SIGALRM) 
+    {
+        thread_all_stop = 1;
+    }
+    return;
+}
 /**
  * @brief Download thread function.
  *
@@ -130,17 +142,21 @@ static void *download_thread(void *arg)
 
         int recv_byte = recv(fd, rbuf, sizeof(rbuf), 0);
         if(status > 0 && FD_ISSET(fd, &fdSet)) {
-            if(recv_byte < 0) {
+            if(recv_byte < 0) 
+            {
                 printf("Can't receive data!\n");
                 break;
-            } else if(recv_byte == 0){
+            } 
+            else if(recv_byte == 0)
+            {
                 break;
-            } else {
+            } 
+            else 
+            {
                 pthread_mutex_lock(&pthread_mutex);
                 total_dl_size += recv_byte;
                 pthread_mutex_unlock(&pthread_mutex);
             }
-
             if(thread_all_stop)
                 break;
         }   
@@ -179,7 +195,8 @@ static void *upload_thread(void *arg)
         goto err;
     }
 
-    if (connect(fd, (struct sockaddr *)t_arg->servinfo.ai_addr, sizeof(struct sockaddr)) == -1){
+    if (connect(fd, (struct sockaddr *)t_arg->servinfo.ai_addr, sizeof(struct sockaddr)) == -1)
+    {
         DEBUG_SPEEDTEST_ERROR("Socket connect error!\n - errno:%s\r\n", strerror(errno));
         sleep(1);
         goto err;
@@ -250,7 +267,7 @@ err:
  * @param arg Unused argument.
  * @return NULL.
  */
-void *calculate_ul_speed_thread() 
+static void *calculate_ul_speed_thread() 
 {
     double ul_speed = 0.0, duration = 0;
     while(1) 
@@ -268,11 +285,10 @@ void *calculate_ul_speed_thread()
         {
             stop_ul_time = st_utilities_get_uptime();
             duration = stop_ul_time-start_ul_time;
-            //ul_speed = (double)total_ul_size/1024/1024/duration*8;
             ul_speed = (double)total_ul_size/1000/1000/duration*8;
             if (duration) 
             {
-                printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bUpload speed: %0.2lf Mbps", ul_speed);
+                printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bUpload speed: %0.2lf Mbps\r\n", ul_speed);
                 fflush(stdout);
             }
             break;
@@ -290,6 +306,7 @@ static void *calculate_dl_speed_thread(void *arg)
 {
     (void)(arg);
     double dl_speed = 0.0, duration = 0;
+    DEBUG_RAW("\r\n");
     while(1) 
     {
         stop_dl_time = st_utilities_get_uptime();
@@ -310,7 +327,7 @@ static void *calculate_dl_speed_thread(void *arg)
             dl_speed = (double)total_dl_size/1000/1000/duration*8;
             if(duration>0) 
             {
-                printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bDownload speed: %0.2lf Mbps", dl_speed);
+                printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bDownload speed: %0.2lf Mbps\r\n", dl_speed);
                 fflush(stdout);
             }   
             break;
@@ -334,8 +351,8 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
     //pthread_t *download_thread = (pthread_t *)malloc(number_of_thread * sizeof(pthread_t));
     st_thread_data_t *download_thread_data = (st_thread_data_t*)malloc(number_of_thread * sizeof(st_thread_data_t));
     memset(download_thread_data, 0, sizeof(st_thread_data_t) * number_of_thread);
-
     pthread_t calculate_thread;
+    struct itimerval timer_val;
     if (nearest_server == NULL)
     {
         DEBUG_SPEEDTEST_ERROR("%s: Nearest server is NULL\r\n");
@@ -380,6 +397,16 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
     }
     DEBUG_SPEEDTEST_INFO("%s: request_url:%s - url: %s\r\n", __FUNCTION__, request_url, nearest_server->url);
     start_dl_time = st_utilities_get_uptime();
+    signal(SIGALRM, speedtest_stop_all_thread);
+    timer_val.it_value.tv_sec = SPEEDTEST_DURATION;
+    timer_val.it_value.tv_usec = 0;
+    timer_val.it_interval.tv_sec = 0;
+    timer_val.it_interval.tv_usec = 0;
+    thread_all_stop = 0;
+    if (setitimer(ITIMER_REAL, &timer_val, 0) == -1)
+    {
+        DEBUG_WARN("Erron when set timer - errno: %s\r\n", strerror(errno));
+    }
     while(1) 
     {
         for(i = 0; i < number_of_thread; i++) 
@@ -397,11 +424,16 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
         }
         if (thread_all_stop)
         {
+            thread_all_stop = 0;
             break;
         }
     }
     free(download_thread_data);
     pthread_detach(calculate_thread);
+    for(i = 0; i < number_of_thread; i++) 
+    {
+        pthread_detach(download_thread_data[i].tid);
+    }
     return 1;
 }
 /**
@@ -418,6 +450,7 @@ int speedtest_upload(server_data_t *test_server, unsigned int number_of_thread)
     sscanf(test_server->url, "http://%[^/]/%s", dummy, request_url);
     start_ul_time = st_utilities_get_uptime();
     pthread_t calculate_thread;
+    struct itimerval timer_val;
     if (test_server == NULL)
     {
         DEBUG_SPEEDTEST_ERROR("%s: Nearest server is NULL\r\n");
@@ -436,6 +469,16 @@ int speedtest_upload(server_data_t *test_server, unsigned int number_of_thread)
     }
     memset(up_thread_data, 0, sizeof(st_thread_data_t) * number_of_thread);
     pthread_create(&calculate_thread, NULL, calculate_ul_speed_thread, NULL);
+    signal(SIGALRM, speedtest_stop_all_thread);
+    timer_val.it_value.tv_sec = SPEEDTEST_DURATION;
+    timer_val.it_value.tv_usec = 0;
+    timer_val.it_interval.tv_sec = 0;
+    timer_val.it_interval.tv_usec = 0;
+    thread_all_stop = 0;
+    if (setitimer(ITIMER_REAL, &timer_val, 0) == -1)
+    {
+        DEBUG_WARN("Error when set timer - errno:%s\r\n", strerror(errno));
+    }
     while(1) 
     {
         for(i = 0; i < number_of_thread; i++) 
@@ -450,26 +493,20 @@ int speedtest_upload(server_data_t *test_server, unsigned int number_of_thread)
                 pthread_create(&up_thread_data[i].tid, NULL, upload_thread, &up_thread_data[i]);
             }
         }
-        if(thread_all_stop)
+        if (thread_all_stop)
+        {
             break;
+        }
     }
-    free(up_thread_data);
+    for (i = 0; i < number_of_thread; i++) 
+    {
+        pthread_join(up_thread_data[i].tid, NULL);
+    }
     pthread_detach(calculate_thread);
+    free(up_thread_data);
     return 1;
 }
-/**
- * @brief Handles SIGALRM signal to stop all threads.
- *
- * @param signo Signal number.
- */
-void speedtest_stop_all_thread(int signo) 
-{
-    if (signo == SIGALRM) 
-    {
-        thread_all_stop=1;
-    }
-    return;
-}
+
 /**
  * @brief Performs a Speedtest on a specific domain name using the given protocol, operation, and number of threads.
  *
@@ -496,11 +533,12 @@ int speedtest_test_domain_name(char *p_domain_name, st_server_protocol_t protoco
     }
     if(operation == SPEEDTEST_SERVER_OPERATION_UPLOAD)
     {
-        speedtest_upload(&server_data, number_of_thread);
+        return speedtest_upload(&server_data, number_of_thread);
+         
     }
     else if (operation == SPEEDTEST_SERVER_OPERATION_DOWNLOAD)
     {
-        speedtest_download(&server_data, number_of_thread);
+        return speedtest_download(&server_data, number_of_thread);
     }
 }
 /**
@@ -558,12 +596,12 @@ int speedtest_test_lowest_latency(st_server_protocol_t protocol, st_server_opera
         DEBUG_SPEEDTEST_VERBOSE("===============================================\n");
         if(operation == SPEEDTEST_SERVER_OPERATION_UPLOAD)
         {
-            speedtest_upload(&nearest_servers[best_server_index], number_of_thread);
+            return speedtest_upload(&nearest_servers[best_server_index], number_of_thread);
             
         }
         else if (operation == SPEEDTEST_SERVER_OPERATION_DOWNLOAD)
         {
-            speedtest_download(&nearest_servers[best_server_index], number_of_thread);
+            return speedtest_download(&nearest_servers[best_server_index], number_of_thread);
         }
         else
         {

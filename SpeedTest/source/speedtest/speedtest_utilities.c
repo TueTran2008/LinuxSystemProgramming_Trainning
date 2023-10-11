@@ -19,6 +19,8 @@
 #include "socket_http.h"
 #include "utilities.h"
 #include <errno.h>
+#include <fcntl.h>
+
 /**
  * @brief Path to the directory where files are stored.
  */
@@ -29,8 +31,6 @@
  * @brief Request URL for servers' location data.
  */
 #define SERVERS_LOCATION_REQUEST_URL "speedtest-servers-static.php?"
-
-
 
 /**
  * @brief Gets system uptime.
@@ -282,9 +282,28 @@ int st_utilities_get_nearest_server(double lat_c, double lon_c, server_data_t *n
         }
         fclose(fp);
     }
+    // if (remove(filePath) == 0)
+    // {
+    //     DEBUG_ERROR("Error when delete file :%s\r\n");
+    //     return 0;
+    // }
+    // else
+    // {
+    //     DEBUG_WARN("Success when delete file :%s\r\n");
+    // }
     return (count > 0) ? 1 : 0;
 }
-
+/**
+ * @brief Retrieves server information based on the provided domain name and protocol.
+ *
+ * This function queries server information (URL, server and domain name) using the specified domain name and protocol. The retrieved
+ * server data is stored in the provided `p_target_server` structure.
+ *
+ * @param p_server_name The domain name of the server to query.
+ * @param protocol The protocol used to communicate with the server (e.g., HTTP, HTTPS, etc.).
+ * @param p_target_server Pointer to the structure where the retrieved server information will be stored.
+ * @return 0 if the server information is successfully retrieved, -1 otherwise.
+ */
 int st_utilities_get_server_through_domain_name(char *p_server_name, st_server_protocol_t protocol, server_data_t *p_target_server)
 {
     struct addrinfo servinfo;

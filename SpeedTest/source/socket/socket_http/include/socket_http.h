@@ -12,8 +12,9 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include "app_debug.h"
 
-#define DEBUG_SOCKET_HTTP_LEVEL 1 //Error level
+#define DEBUG_SOCKET_HTTP_LEVEL DEBUG_LEVEL_NONE //Error level
 
 /**
  * @brief Performs an HTTP GET request and saves the response to a file.

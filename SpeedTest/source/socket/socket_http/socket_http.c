@@ -17,6 +17,10 @@
 #include "app_debug.h"
 #include <errno.h>
 #include "socket_http.h"
+#include "socket_ip.h"
+#include "socket_utilities.h"
+#include <sys/stat.h>
+#include <fcntl.h> 
 
 /**
  * @brief Macro for verbose debugging messages.
@@ -89,7 +93,7 @@ int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *requ
         }
         return 0;
     }
-    if (connect(fd, (struct sockaddr *)serv, sizeof(struct sockaddr)) == -1) 
+    if (socket_utilities_connect_timeout(fd, (struct sockaddr *)serv) == -1) 
     {
         DEBUG_SOCKET_HTTP_ERROR("%s: Socket connect error!\r\nDomain: %s - errno: %s\r\n", __FUNCTION__, domain_name, strerror(errno));
         if (fd) 
@@ -113,7 +117,13 @@ int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *requ
     DEBUG_SOCKET_HTTP_INFO("%s: HTTP Get:\r\n****************************************\r\n%s\r\n****************************************\r\n", __FUNCTION__, sbuf);
     sprintf(tmp_path, "%s%s", FILE_DIRECTORY_PATH, filename);
     DEBUG_SOCKET_HTTP_INFO("%s: HTTP get directory: %s\r\n", __FUNCTION__, tmp_path);
-    fp = fopen(tmp_path, "r");
+    fp = fopen(tmp_path, "w");
+    
+    if(fp == NULL)
+    {
+        DEBUG_SOCKET_HTTP_ERROR("%s: Unable to open :%s - errno: %s\r\n", __FUNCTION__, tmp_path, strerror(errno));
+        return 0;
+    }
     /*Perform non blocking IO read*/
     while(1) 
     {
