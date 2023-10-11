@@ -62,11 +62,14 @@ static bool  m_test_only_download = false;
  */
 static void print_help(void)
 {
-    DEBUG_INFO("Usage (options are case sensitive):"
-              "help - Show this help"
-              "--download_testing - Run only download testing"
-              "--upload_testing - Run only upload testing"
-              "--server URL - use server URL, don't read config"
+    DEBUG_INFO("Usage (options are case sensitive):\r\n"
+              "--help - Show this help\r\n"
+              "--download_testing - Run only download testing\r\n"
+              "--upload_testing - Run only upload testing\r\n"
+              "--server URL - Sse server URL instead of reading config\r\n"
+              "--thread N - Run test with N threads\r\n"
+              "HTTP - Use HTTP protocol\r\n"
+              "HTTPS - Use HTTPS protocol\r\n"
     
     );
 }
