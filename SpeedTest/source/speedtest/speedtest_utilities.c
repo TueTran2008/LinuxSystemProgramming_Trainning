@@ -67,7 +67,17 @@ int st_utilities_get_best_server(server_data_t *nearest_servers, st_server_proto
     char url[128], buf[128], filePath[64] = {0}, line[64] = {0};
     struct timeval tv1, tv2;
     struct addrinfo servinfo;
+    char protocol_buf[10];
 
+    memset(protocol_buf, 0, sizeof(protocol_buf));
+    if (protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
+    {
+        sprintf(protocol_buf, "%s", "http");
+    }
+    else if (protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        sprintf(protocol_buf, "%s", "https");
+    }
     sprintf(filePath, "%s%s", FILE_DIRECTORY_PATH, latency_name);
 
     for (i = 0; i < NEAREST_SERVERS_NUM; i++) 
@@ -118,7 +128,7 @@ int st_utilities_get_best_server(server_data_t *nearest_servers, st_server_proto
             ptr += strlen(nearest_servers[i].domain_name);
             strncpy(latency_request_url, ptr, strlen(ptr));
         }
-        if(socket_ipv4_get_from_url(nearest_servers[i].domain_name, "http", &servinfo)) 
+        if(socket_ipv4_get_from_url(nearest_servers[i].domain_name, protocol_buf, &servinfo)) 
         {
             memcpy(&nearest_servers[i].servinfo, &servinfo, sizeof(servinfo));
             gettimeofday(&tv1, NULL);
@@ -153,7 +163,7 @@ int st_utilities_get_best_server(server_data_t *nearest_servers, st_server_proto
                 latency = nearest_servers[i].latency;
             }           
         }
-        nearest_servers[i].servinfo = servinfo;
+        //nearest_servers[i].servinfo = servinfo;
     }
     return best_index;
 }
@@ -307,12 +317,23 @@ int st_utilities_get_nearest_server(double lat_c, double lon_c, server_data_t *n
 int st_utilities_get_server_through_domain_name(char *p_server_name, st_server_protocol_t protocol, server_data_t *p_target_server)
 {
     struct addrinfo servinfo;
+    char protocol_buf[10];
+    memset(protocol_buf, 0, sizeof(protocol_buf));
+    if (protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
+    {
+        sprintf(protocol_buf, "%s", "http");
+    }
+    else if (protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        sprintf(protocol_buf, "%s", "https");
+    }
+    
     if(p_server_name == NULL)
     {
         printf("%s: Input server is NULL", __FUNCTION__);
         return -1;
     }
-    if(socket_ipv4_get_from_url(p_server_name, "http", &servinfo) == 0) 
+    if(socket_ipv4_get_from_url(p_server_name,  protocol_buf, &servinfo) == 0) 
     {
         printf("Errno when resolse ip - errno:%s\r\n", strerror(errno));
         return -1;

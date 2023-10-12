@@ -20,6 +20,7 @@
 #include "speedtest_utilities.h"
 #include "socket_ip.h"
 #include "socket_http.h"
+#include "socket_utilities.h"
 /*Supprot HTTPS protocol*/
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
@@ -133,8 +134,8 @@ static void *download_thread(void *arg)
         sleep(5);
         goto err;
     }
-    if (connect(fd, (struct sockaddr *)t_arg->servinfo.ai_addr, sizeof(struct sockaddr)) == -1) {
-        DEBUG_SPEEDTEST_ERROR("Socket connect error!\n - errno:%s\r\n", strerror(errno));
+    if (socket_utilities_connect_timeout(fd, (struct sockaddr *)t_arg->servinfo.ai_addr) == -1) {
+        DEBUG_SPEEDTEST_ERROR("Domain name: %s - Socket connect error! - errno:%s\r\n", t_arg->domain_name, strerror(errno));
         sleep(1);
         goto err;
     }
@@ -192,7 +193,7 @@ static void *download_thread(void *arg)
     {
         if ((size = send(fd, sbuf, strlen(sbuf), 0)) != strlen(sbuf)) 
         {
-            DEBUG_SPEEDTEST_ERROR("HTTP Can't send header to server\n");
+            DEBUG_SPEEDTEST_ERROR(":%s: HTTP Can't send header to server\n", __FUNCTION__);
             goto err;
         }
     }
@@ -200,7 +201,7 @@ static void *download_thread(void *arg)
     {
         if (size = SSL_write(ssl, sbuf, strlen(sbuf)) != strlen(sbuf))
         {
-            DEBUG_SPEEDTEST_ERROR("HTTPS Can't send header to server\n");
+            DEBUG_SPEEDTEST_ERROR(":%s HTTPS Can't send header to server\n", __FUNCTION__);
             goto err;
         }
     }
@@ -322,8 +323,7 @@ err:
     {
         close(fd);
     }
-
-    t_arg->running = 0;
+    //t_arg->running = 0;
     return NULL;
 }
 /**
@@ -364,10 +364,9 @@ static void *upload_thread(void *arg)
         DEBUG_SPEEDTEST_ERROR("Open socket error!\n");
         goto err;
     }
-
-    if (connect(fd, (struct sockaddr *)t_arg->servinfo.ai_addr, sizeof(struct sockaddr)) == -1)
+    if (socket_utilities_connect_timeout(fd, (struct sockaddr *)t_arg->servinfo.ai_addr) == -1)
     {
-        DEBUG_SPEEDTEST_ERROR("Socket connect error!\n - errno:%s\r\n", strerror(errno));
+        DEBUG_SPEEDTEST_ERROR("Domain name:%s - Socket connect error! - errno: %s\r\n", t_arg->domain_name, strerror(errno));
         sleep(1);
         goto err;
     }
@@ -451,9 +450,9 @@ static void *upload_thread(void *arg)
     {
         if (t_arg->protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
         {
-            if ((size = send(fd, data, sizeof(data), 0)) != sizeof(sbuf)) 
+            if ((size = send(fd, data, sizeof(data), 0)) != sizeof(data)) 
             {
-                DEBUG_SPEEDTEST_ERROR("HTTP Can't send header to server\n");
+                DEBUG_SPEEDTEST_ERROR("%s: HTTP Can't upload data to server - size: %ld\n", __FUNCTION__, size);
                 goto err;
             }
         }
@@ -461,7 +460,7 @@ static void *upload_thread(void *arg)
         {
             if (size = SSL_write(ssl, data, sizeof(data)) != sizeof(data))
             {
-                DEBUG_SPEEDTEST_ERROR("HTTPS Can't send header to server\n");
+                DEBUG_SPEEDTEST_ERROR("%s: HTTPS Can't send header to server\n", __FUNCTION__);
                 goto err;
             }
         }
@@ -566,7 +565,7 @@ err:
     }
     if (fd) 
         close(fd);
-    t_arg->running = 0;
+    //t_arg->running = 0;
 
     return NULL;
 }
@@ -634,7 +633,7 @@ static void *calculate_dl_speed_thread(void *arg)
             duration = stop_dl_time-start_dl_time;
             //dl_speed = (double)total_dl_size/1024/1024/duration*8;
             dl_speed = (double)total_dl_size/1000/1000/duration*8;
-            if(duration>0) 
+            if(duration > 0) 
             {
                 printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bDownload speed: %0.2lf Mbps\r\n", dl_speed);
                 fflush(stdout);
@@ -684,7 +683,14 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
         request_url = speedtest/upload.php
         dummy = speedtesthni2.viettel.vn:8080
     */
-    sscanf(nearest_server->url, "http://%[^/]/%s", dummy, request_url);
+    if (protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
+    {
+        sscanf(nearest_server->url, "http://%[^/]/%s", dummy, request_url);
+    }
+    else if (protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        sscanf(nearest_server->url, "https://%[^/]/%s", dummy, request_url);
+    }
     strncpy(url, request_url, sizeof(request_url));
     memset(request_url, 0, sizeof(request_url));
     ptr = strtok(url, "/");
@@ -729,20 +735,20 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
                 download_thread_data[i].thread_index = i;
                 download_thread_data[i].running = 1;
                 pthread_create(&download_thread_data[i].tid, NULL, download_thread, &download_thread_data[i]);
+                DEBUG_SPEEDTEST_VERBOSE("Create thread download :%ld\t\n", download_thread_data[i].tid);
             }
         }
         if (thread_all_stop)
         {
-            thread_all_stop = 0;
             break;
         }
     }
-    free(download_thread_data);
-    pthread_detach(calculate_thread);
     for(i = 0; i < number_of_thread; i++) 
     {
         pthread_detach(download_thread_data[i].tid);
     }
+    pthread_detach(calculate_thread);
+    free(download_thread_data);
     return 1;
 }
 /**
@@ -756,7 +762,14 @@ int speedtest_upload(server_data_t *test_server, unsigned int number_of_thread, 
 {
     int i;
     char dummy[128] = {0}, request_url[128]={0};
-    sscanf(test_server->url, "http://%[^/]/%s", dummy, request_url);
+    if (protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
+    {
+        sscanf(test_server->url, "http://%[^/]/%s", dummy, request_url);
+    }
+    else if (protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        sscanf(test_server->url, "https://%[^/]/%s", dummy, request_url);
+    }
     start_ul_time = st_utilities_get_uptime();
     pthread_t calculate_thread;
     struct itimerval timer_val;
@@ -800,16 +813,26 @@ int speedtest_upload(server_data_t *test_server, unsigned int number_of_thread, 
             {
                 up_thread_data[i].thread_index = i;
                 up_thread_data[i].running = 1;
-                pthread_create(&up_thread_data[i].tid, NULL, upload_thread, &up_thread_data[i]);
+                int s = pthread_create(&up_thread_data[i].tid, NULL, upload_thread, &up_thread_data[i]);
+                if(s != 0)
+                {
+                    DEBUG_ERROR("Error when create thread\r\n");
+                }
+                else
+                {
+                    DEBUG_SPEEDTEST_VERBOSE("Creat e thread :%ld\r\n", up_thread_data[i].tid);
+                }
             }
         }
         if (thread_all_stop)
         {
+            DEBUG_SPEEDTEST_VERBOSE("Stop all task\r\n");
             break;
         }
     }
     for (i = 0; i < number_of_thread; i++) 
     {
+        DEBUG_SPEEDTEST_VERBOSE("Delete thread upload: %d\r\n", up_thread_data[i].tid);
         pthread_join(up_thread_data[i].tid, NULL);
     }
     pthread_detach(calculate_thread);
@@ -869,12 +892,21 @@ int speedtest_test_lowest_latency(st_server_protocol_t protocol, st_server_opera
     struct itimerval timerVal;
     char operation_buf[24];
     memset(operation_buf, 0, sizeof(operation_buf));
+    if (protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
+    {
+        sprintf(operation_buf, "%s", "http");
+    }
+    else if (protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        sprintf(operation_buf, "%s", "https");
+    }
+    
     memset(&client_data, 0, sizeof(client_data_t));
     for (i = 0; i < NEAREST_SERVERS_NUM; i++) 
     {
         memset(&nearest_servers[i], 0, sizeof(server_data_t));
     }
-    if (socket_ipv4_get_from_url(SPEEDTEST_DOMAIN_NAME, "http", &servinfo)) 
+    if (socket_ipv4_get_from_url(SPEEDTEST_DOMAIN_NAME, operation_buf, &servinfo)) 
     {
         if (!socket_http_get_file((struct sockaddr_in *)servinfo.ai_addr, SPEEDTEST_DOMAIN_NAME, CONFIG_REQUEST_URL, CONFIG_REQUEST_URL)) 
         {
@@ -882,7 +914,7 @@ int speedtest_test_lowest_latency(st_server_protocol_t protocol, st_server_opera
             return -1;
         }
     }
-    if(socket_ipv4_get_from_url(SPEEDTEST_SERVERS_DOMAIN_NAME, "http", &servinfo)) 
+    if(socket_ipv4_get_from_url(SPEEDTEST_SERVERS_DOMAIN_NAME, operation_buf, &servinfo)) 
     {
         if(!socket_http_get_file((struct sockaddr_in *)servinfo.ai_addr, SPEEDTEST_SERVERS_DOMAIN_NAME, SERVERS_LOCATION_REQUEST_URL, SERVERS_LOCATION_REQUEST_URL)) {
             DEBUG_ERROR("Can't get servers list.\n");
@@ -919,6 +951,10 @@ int speedtest_test_lowest_latency(st_server_protocol_t protocol, st_server_opera
         {
             DEBUG_SPEEDTEST_ERROR("Invalid operation\r\n");
         }
+    }
+    else
+    {
+        DEBUG_SPEEDTEST_ERROR("Cannot get best server\r\n");
     }
     return 0;
 }

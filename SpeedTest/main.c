@@ -230,12 +230,12 @@ int main(int argc, char *argv[])
             operation = SPEEDTEST_SERVER_OPERATION_DOWNLOAD;
             speedtest_test_domain_name(p_server_url, protocol, operation, number_of_thread);
             operation = SPEEDTEST_SERVER_OPERATION_UPLOAD;
-            speedtest_test_lowest_latency(protocol, operation, number_of_thread);
+            speedtest_test_domain_name(p_server_url, protocol, operation, number_of_thread);
         }
         else
         {
             operation = SPEEDTEST_SERVER_OPERATION_DOWNLOAD;
-            speedtest_test_domain_name(p_server_url, protocol, operation, number_of_thread);
+            speedtest_test_lowest_latency(protocol, operation, number_of_thread);
             operation = SPEEDTEST_SERVER_OPERATION_UPLOAD;
             speedtest_test_lowest_latency(protocol, operation, number_of_thread); 
         }

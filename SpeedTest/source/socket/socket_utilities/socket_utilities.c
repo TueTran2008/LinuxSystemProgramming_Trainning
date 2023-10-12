@@ -76,7 +76,7 @@ int socket_utilities_connect_timeout(int socket_fd, struct sockaddr *server)
         DEBUG_SOCKET_UTILITIES_VERBOSE("EINPROGRESS in connect() - selecting\n"); 
         do 
         { 
-           tv.tv_sec = 15; 
+           tv.tv_sec = 10; 
            tv.tv_usec = 0; 
            FD_ZERO(&myset); 
            FD_SET(socket_fd, &myset); 

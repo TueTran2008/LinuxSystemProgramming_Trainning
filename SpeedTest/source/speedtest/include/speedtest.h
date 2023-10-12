@@ -77,7 +77,7 @@ typedef struct {
 /**
  * @brief Log debugging level of the source file
  */
-#define DEBUG_SPEEDTEST_LEVEL DEBUG_LEVEL_ERROR
+#define DEBUG_SPEEDTEST_LEVEL DEBUG_LEVEL_VERBOSE
 /**
  * @brief Number of nearest servers to consider.
  */
