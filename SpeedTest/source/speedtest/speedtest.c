@@ -174,6 +174,7 @@ static void *download_thread(void *arg)
         if(server_cert == NULL)
         {
             DEBUG_SPEEDTEST_VERBOSE("Cannot get cirpher X509 \r\n");
+            return NULL;
         }
 
         DEBUG_SPEEDTEST_VERBOSE("(6) server's certificate was received:\n\n");
@@ -399,6 +400,7 @@ static void *upload_thread(void *arg)
         if(server_cert == NULL)
         {
             DEBUG_SPEEDTEST_VERBOSE("Cannot get cirpher X509 \r\n");
+            return NULL;
         }
 
         DEBUG_SPEEDTEST_VERBOSE("(6) server's certificate was received:\n\n");
@@ -776,6 +778,7 @@ int speedtest_test_domain_name(char *p_domain_name, st_server_protocol_t protoco
 {
     int ret = 0;
     server_data_t server_data;
+    memset(&server_data, 0, sizeof(server_data));
     if (p_domain_name == NULL)
     {
         DEBUG_SPEEDTEST_ERROR("Error when get domain name server\r\n");

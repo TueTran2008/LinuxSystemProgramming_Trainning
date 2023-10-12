@@ -182,7 +182,7 @@ int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *requ
 int https_test(void)
 {
     struct addrinfo servinfo;
-    char p_server_name[] = "www.speedtest.net";
+    char p_server_name[] = "httpbin.org/get";
     memset(&servinfo, 0, sizeof(servinfo));
     if(socket_ipv4_get_from_url(p_server_name, "https", &servinfo) == 0) 
     {
@@ -301,7 +301,7 @@ int socket_https_get_file(struct sockaddr_in *serv, char *domain_name, char *req
 
     sprintf(sbuf,
             "GET /%s HTTP/1.0\r\n"
-            "Host: %s\r\n"
+            "Host: %s:443\r\n"
             "User-Agent: status\r\n"
             "Accept: */*\r\n\r\n", request_url, domain_name);  
 
@@ -313,7 +313,7 @@ int socket_https_get_file(struct sockaddr_in *serv, char *domain_name, char *req
     DEBUG_SOCKET_HTTP_INFO("%s: HTTP Get:\r\n****************************************\r\n%s\r\n****************************************\r\n", __FUNCTION__, sbuf);
     sprintf(tmp_path, "%s%s", FILE_DIRECTORY_PATH, filename);
     DEBUG_SOCKET_HTTP_INFO("%s: HTTP get directory: %s\r\n", __FUNCTION__, tmp_path);
-    fp = fopen(tmp_path, "w+");
+    fp = fopen(tmp_path, "w");
     
     if(fp == NULL)
     {
@@ -326,7 +326,8 @@ int socket_https_get_file(struct sockaddr_in *serv, char *domain_name, char *req
     while (1)
     {
         char *ptr = NULL;
-        int recv_byte = SSL_read(ssl, sbuf, sizeof(sbuf));
+        int recv_byte = SSL_read(ssl, rbuf, sizeof(rbuf) - 1);
+        DEBUG_SOCKET_HTTP_VERBOSE("(8) got back %d bytes of HTTP response:\n\n%s\n", recv_byte, rbuf);
         if (recv_byte > 0)
         {
             if ((ptr = strstr(rbuf, "\r\n\r\n")) != NULL) 

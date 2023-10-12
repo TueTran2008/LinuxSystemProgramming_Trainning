@@ -15,16 +15,10 @@ SRC += source/user_app/old_app_debug/*.c
 
 INC += -I./source/user_app/utilities/include
 SRC += source/user_app/utilities/*.c
-
-INC += -I./source/openssl/openssl/include
-
-# LIB += -L./source/openssl/openssl
-# INC += -I./source/openssl/openssl/include/internal
-# INC += -I./source/openssl/openssl/include/openssl
-
-all: main.c $(SRC)
-	$(CC) $(INC) main.c  $(SRC) -o speedtest -lpthread -lm ${LIB} -lssl -lcrypto 
-
+all: main.c $(SRC) speedtest
+	$(CC) $(INC) main.c  $(SRC) -o speedtest -lpthread -lm -lcrypto -lssl 
+speedtest:
+	sudo apt-get install openssl libssl-dev
 debug_memory: main.c $(SRC)
 	$(CC) $(INC) main.c $(SRC) -lpthread -std=c11 -lm -o debug
 	valgrind --track-origins=yes --leak-check=full ./debug

@@ -105,7 +105,7 @@ typedef struct {
 /**
  * @brief Dureation in second for each speed test task
  */
-#define SPEEDTEST_DURATION 15
+#define SPEEDTEST_DURATION 10
 
 
 

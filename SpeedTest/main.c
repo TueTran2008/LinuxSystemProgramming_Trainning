@@ -132,7 +132,8 @@ int main(int argc, char *argv[])
 {
     app_debug_register_callback_print(app_puts); /*Install callback print function*/
     app_debug_init(app_get_ms, app_lock);
-
+    // https_test();
+    // return 0;
     if (argc < 2)
     {
         int ret = 0;
@@ -228,6 +229,7 @@ int main(int argc, char *argv[])
     {
         if (perform_server_url)
         {
+            printf("Server url:%s\r\n", p_server_url);
             operation = SPEEDTEST_SERVER_OPERATION_DOWNLOAD;
             speedtest_test_domain_name(p_server_url, protocol, operation, number_of_thread);
             operation = SPEEDTEST_SERVER_OPERATION_UPLOAD;
