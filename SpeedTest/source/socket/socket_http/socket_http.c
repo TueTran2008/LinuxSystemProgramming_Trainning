@@ -124,7 +124,7 @@ int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *requ
     DEBUG_SOCKET_HTTP_INFO("%s: HTTP Get:\r\n****************************************\r\n%s\r\n****************************************\r\n", __FUNCTION__, sbuf);
     sprintf(tmp_path, "%s%s", FILE_DIRECTORY_PATH, filename);
     DEBUG_SOCKET_HTTP_INFO("%s: HTTP get directory: %s\r\n", __FUNCTION__, tmp_path);
-    fp = fopen(tmp_path, "w");
+    fp = fopen(tmp_path, "w+");
     
     if(fp == NULL)
     {
@@ -134,7 +134,7 @@ int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *requ
     /*Perform non blocking IO read*/
     while(1) 
     {
-        char *ptr=NULL;
+        char *ptr = NULL;
         memset(rbuf, 0, sizeof(rbuf));
         FD_ZERO(&fdSet);
         FD_SET(fd, &fdSet);
@@ -200,15 +200,24 @@ int socket_https_get_file(struct sockaddr_in *serv, char *domain_name, char *req
     SSL_CTX *ctx = NULL;
     SSL_METHOD *client_method = NULL;
     X509 *server_cert = NULL;
-    char *str, *host_name, output_buf[4096], input_buf[4096], host_header[512];
     struct hostent *host_entry = NULL;
     struct sockaddr_in server_socket_address;
     struct in_addr ip;
 
-    memset(output_buf, 0, sizeof(output_buf));
-    memset(input_buf, 0, sizeof(input_buf));
-    memset(host_header, 0, sizeof(host_header));
-    memset(&ip, 0, sizeof(struct in_addr));
+    char sbuf[256] = {0}, tmp_path[128] = {0};
+    char rbuf[8192];
+    struct timeval tv;
+    fd_set fdSet;
+    FILE *fp = NULL;
+    char *x509_str = NULL;
+    ssize_t size = 0;
+    int count = 0; /*Error counting\r\n*/
+
+
+    memset(sbuf, 0, sizeof(sbuf));
+    memset(tmp_path, 0, sizeof(tmp_path));
+    memset(rbuf, 0, sizeof(sbuf));
+
 
     /*========================================*/
     /* (1) initialize SSL library */
@@ -231,7 +240,6 @@ int socket_https_get_file(struct sockaddr_in *serv, char *domain_name, char *req
     {
         DEBUG_SOCKET_HTTP_ERROR("Cannot connect to server port - errno: %s\r\n", strerror(errno));
     }
-    DEBUG_SOCKET_HTTP_VERBOSE("(3) TCP connection open to host '%s', port:%d\n\n", domain_name, serv->sin_port); 
     /*========================================================
     */
     /* (4) initiate the SSL handshake over the TCP connection
@@ -239,7 +247,7 @@ int socket_https_get_file(struct sockaddr_in *serv, char *domain_name, char *req
 
     /*========================================================*/ 
     SSLeay_add_ssl_algorithms();
-    client_method = SSLv23_client_method();
+    client_method = (SSL_METHOD*)SSLv23_client_method();
     SSL_load_error_strings();
     ctx = SSL_CTX_new(client_method); 
     if(ctx == NULL)
@@ -281,43 +289,110 @@ int socket_https_get_file(struct sockaddr_in *serv, char *domain_name, char *req
 
     DEBUG_SOCKET_HTTP_VERBOSE("(6) server's certificate was received:\n\n");
 
-    str = X509_NAME_oneline(X509_get_subject_name(server_cert), 0, 0);
-    DEBUG_SOCKET_HTTP_VERBOSE(" subject: %s\n", str);
+    x509_str = X509_NAME_oneline(X509_get_subject_name(server_cert), 0, 0);
+    DEBUG_SOCKET_HTTP_VERBOSE(" subject: %s\n", x509_str);
 
-    str = X509_NAME_oneline(X509_get_issuer_name(server_cert), 0, 0);
-    DEBUG_SOCKET_HTTP_VERBOSE(" issuer: %s\n\n", str);
+    x509_str = X509_NAME_oneline(X509_get_issuer_name(server_cert), 0, 0);
+    DEBUG_SOCKET_HTTP_VERBOSE(" issuer: %s\n\n", x509_str);
 
     /* certificate verification would happen here */
 
     X509_free(server_cert);
 
-    sprintf(output_buf,
+    sprintf(sbuf,
             "GET /%s HTTP/1.0\r\n"
             "Host: %s\r\n"
             "User-Agent: status\r\n"
-            "Accept: */*\r\n\r\n", "speedtest-config.php", domain_name);  
+            "Accept: */*\r\n\r\n", request_url, domain_name);  
 
-    ret = SSL_write(ssl, output_buf, strlen(output_buf));
+    ret = SSL_write(ssl, sbuf, strlen(sbuf));
     //shutdown (fd, 1); /* send EOF to server */
 
-    DEBUG_SOCKET_HTTP_VERBOSE("(7) sent HTTP request over encrypted channel:\n\n%s\n", output_buf);
+    DEBUG_SOCKET_HTTP_VERBOSE("(7) sent HTTP request over encrypted channel:\n\n%s\n", sbuf);
 
+    DEBUG_SOCKET_HTTP_INFO("%s: HTTP Get:\r\n****************************************\r\n%s\r\n****************************************\r\n", __FUNCTION__, sbuf);
+    sprintf(tmp_path, "%s%s", FILE_DIRECTORY_PATH, filename);
+    DEBUG_SOCKET_HTTP_INFO("%s: HTTP get directory: %s\r\n", __FUNCTION__, tmp_path);
+    fp = fopen(tmp_path, "w+");
+    
+    if(fp == NULL)
+    {
+        DEBUG_SOCKET_HTTP_ERROR("%s: Unable to open :%s - errno: %s\r\n", __FUNCTION__, tmp_path, strerror(errno));
+        return 0;
+    }
     /**************************************************/
     /* (8) read back HTTP response from the SSL stack */
     /**************************************************/
-
-    ret = SSL_read(ssl, input_buf, sizeof(input_buf) - 1);
-    //input_buf[ret] = '\0';
-    if(ret == 0)
+    while (1)
     {
-        printf("No response\r\n");
-    }
-    else
-    {
-        printf("ret%d\r\n", ret);
-    }
-    DEBUG_SOCKET_HTTP_VERBOSE("(8) got back %d bytes of HTTP response:\n\n%s\n", ret, input_buf);
+        char *ptr = NULL;
+        int recv_byte = SSL_read(ssl, sbuf, sizeof(sbuf));
+        if (recv_byte > 0)
+        {
+            if ((ptr = strstr(rbuf, "\r\n\r\n")) != NULL) 
+            {
+                ptr += 4;
+                fwrite(ptr, 1, strlen(ptr), fp);
+            } 
+            else 
+            {
+                fwrite(rbuf, 1, recv_byte, fp);
+            }
+        }
+        else 
+        {
+            count++;
+            ret = SSL_get_error(ssl, recv_byte);
+            switch(ret)
+            {
+                case SSL_ERROR_NONE:
+                {
+                    DEBUG_SOCKET_HTTP_ERROR("SSL_ERROR_NONE %i\r\n", count);
+                }
+                    break;
+                case SSL_ERROR_ZERO_RETURN:
+                {
+                    fd_set fds;
+                    DEBUG_SOCKET_HTTP_ERROR("SSL_ERROR_WANT_READ :%i\r\n", count);
+                    int sock_fd = SSL_get_rfd(ssl);
+                    FD_ZERO(&fds);
+                    FD_SET(sock_fd, &fds);
+                    tv.tv_sec = 3;
+                    tv.tv_usec = 0;
+                    ret = select(sock_fd + 1, NULL, &fds, NULL, &tv);
+                    if (ret > 0 && FD_ISSET(fd, &fdSet))
+                    {
+                        /*Back to read data*/
+                        continue; // can write more data now...
+                    }
 
+                    if (ret == 0) 
+                    {
+                        // timeout...
+                        break;
+                    } 
+                    else 
+                    {
+                        // error...
+                        DEBUG_SOCKET_HTTP_VERBOSE("Cannot receive data\r\n");
+                        printf("Can't get http file!\n");
+                        close(fd);
+                        fclose(fp);
+                        SSL_shutdown(ssl);
+                        SSL_free (ssl);
+                        SSL_CTX_free (ctx);
+                        return 0;
+                    }
+                }
+                    break;
+                default:
+                {
+                    DEBUG_SOCKET_HTTP_ERROR("error %i:%i\n", recv_byte, ret); 
+                    break;
+                }
+            }
+        }
+    }
     /************************************************/
     /* (9) all done, so close connection & clean up */
     /************************************************/

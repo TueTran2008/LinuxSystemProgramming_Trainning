@@ -20,6 +20,12 @@
 #include "speedtest_utilities.h"
 #include "socket_ip.h"
 #include "socket_http.h"
+/*Supprot HTTPS protocol*/
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 
 /**
@@ -107,6 +113,20 @@ static void *download_thread(void *arg)
     char sbuf[315] = {0}, rbuf[DL_BUFFER_SIZE];
     struct timeval tv;
     fd_set fdSet;
+
+    int ret = 0;
+    SSL *ssl = NULL;
+    SSL_CTX *ctx = NULL;
+    SSL_METHOD *client_method = NULL;
+    X509 *server_cert = NULL;
+    // char *str, *host_name, output_buf[4096], input_buf[4096], host_header[512];
+    struct hostent *host_entry = NULL;
+    struct sockaddr_in server_socket_address;
+    struct in_addr ip;    
+    char *x509_str;
+    int count = 0;
+    ssize_t size = 0;
+
     if ((fd = socket(t_arg->servinfo.ai_family, SOCK_STREAM, 0)) == -1) 
     {    
         DEBUG_SPEEDTEST_ERROR("Open socket error! - ernno: %d\r\n\n");
@@ -123,49 +143,186 @@ static void *download_thread(void *arg)
             "Host: %s\r\n"
             "User-Agent: status\r\n"
             "Accept: */*\r\n\r\n", t_arg->request_url, t_arg->domain_name);
-
-    if(send(fd, sbuf, strlen(sbuf), 0) != strlen(sbuf)) 
+    if(t_arg->protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
     {
-        DEBUG_SPEEDTEST_ERROR("Can't send data to server\n");
-        goto err;
+        SSLeay_add_ssl_algorithms();
+        client_method = (SSL_METHOD*)SSLv23_client_method();
+        SSL_load_error_strings();
+        ctx = SSL_CTX_new(client_method); 
+        if(ctx == NULL)
+        {
+            DEBUG_SPEEDTEST_ERROR("Cannot create certificate ctx\r\n");
+        }
+        DEBUG_SPEEDTEST_VERBOSE("(1) SSL context initialized\n\n");
+        ssl = SSL_new(ctx); /* create SSL stack endpoint*/
+        if(ssl == NULL)
+        {
+            DEBUG_SPEEDTEST_ERROR("Cannot create certificate ssl\r\n");
+        }
+
+        SSL_set_fd(ssl, fd); /* attach SSL stack to socket
+        */
+        ret = SSL_connect(ssl); /* initiate SSL handshake */ 
+        DEBUG_SPEEDTEST_VERBOSE("(4) SSL endpoint created & handshake completed\n\n");
+        printf("(5) SSL connected with cipher: %s\n\n",
+        SSL_get_cipher(ssl));
+        if(SSL_get_cipher(ssl) == NULL)
+        {
+            DEBUG_SPEEDTEST_VERBOSE("Cannot get cirpher \r\n");
+        }
+        if(server_cert == NULL)
+        {
+            DEBUG_SPEEDTEST_VERBOSE("Cannot get cirpher X509 \r\n");
+        }
+
+        DEBUG_SPEEDTEST_VERBOSE("(6) server's certificate was received:\n\n");
+
+        x509_str = X509_NAME_oneline(X509_get_subject_name(server_cert), 0, 0);
+        DEBUG_SPEEDTEST_VERBOSE(" subject: %s\n", x509_str);
+
+        x509_str = X509_NAME_oneline(X509_get_issuer_name(server_cert), 0, 0);
+        DEBUG_SPEEDTEST_VERBOSE(" issuer: %s\n\n", x509_str);
+
+        /* certificate verification would happen here */
+
+        X509_free(server_cert);
+    }
+    /*Send the HTTP header*/
+    if (t_arg->protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
+    {
+        if ((size = send(fd, sbuf, strlen(sbuf), 0)) != strlen(sbuf)) 
+        {
+            DEBUG_SPEEDTEST_ERROR("HTTP Can't send header to server\n");
+            goto err;
+        }
+    }
+    else if (t_arg->protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        if (size = SSL_write(ssl, sbuf, strlen(sbuf)) != strlen(sbuf))
+        {
+            DEBUG_SPEEDTEST_ERROR("HTTPS Can't send header to server\n");
+            goto err;
+        }
+    }
+    else 
+    {
+        DEBUG_ERROR("Invalid protocol\r\n");
     }
     DEBUG_SPEEDTEST_VERBOSE("%s: HTTP Get message: %s\r\n", __FUNCTION__, sbuf);
-    while(1) 
+    if (t_arg->protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
     {
-        /*None Blocking API*/
-        FD_ZERO(&fdSet);
-        FD_SET(fd, &fdSet);
+        while(1) 
+        {
+            /*None Blocking API*/
+            FD_ZERO(&fdSet);
+            FD_SET(fd, &fdSet);
 
-        tv.tv_sec = 3;
-        tv.tv_usec = 0;
-        int status = select(fd + 1, &fdSet, NULL, NULL, &tv);                                                         
+            tv.tv_sec = 3;
+            tv.tv_usec = 0;
+            int status = select(fd + 1, &fdSet, NULL, NULL, &tv);                                                         
 
-        int recv_byte = recv(fd, rbuf, sizeof(rbuf), 0);
-        if(status > 0 && FD_ISSET(fd, &fdSet)) {
-            if(recv_byte < 0) 
+            int recv_byte = recv(fd, rbuf, sizeof(rbuf), 0);
+            if  (status > 0 && FD_ISSET(fd, &fdSet)) 
             {
-                printf("Can't receive data!\n");
-                break;
-            } 
-            else if(recv_byte == 0)
-            {
-                break;
-            } 
-            else 
+                if(recv_byte < 0) 
+                {
+                    printf("Can't receive data!\n");
+                    break;
+                } 
+                else if(recv_byte == 0)
+                {
+                    break;
+                } 
+                else 
+                {
+                    pthread_mutex_lock(&pthread_mutex);
+                    total_dl_size += recv_byte;
+                    pthread_mutex_unlock(&pthread_mutex);
+                }
+                if (thread_all_stop)
+                {
+                    break;
+                }
+            }   
+        }
+    }
+    else if (t_arg->protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        while (1)
+        {
+            int recv_byte = SSL_read(ssl, sbuf, sizeof(sbuf));
+            if (recv_byte > 0)
             {
                 pthread_mutex_lock(&pthread_mutex);
                 total_dl_size += recv_byte;
                 pthread_mutex_unlock(&pthread_mutex);
             }
-            if(thread_all_stop)
+            else 
+            {
+                count++;
+                ret = SSL_get_error(ssl, recv_byte);
+                switch(ret)
+                {
+                    case SSL_ERROR_NONE:
+                    {
+                        DEBUG_SPEEDTEST_ERROR("SSL_ERROR_NONE %i\r\n", count);
+                    }
+                        break;
+                    case SSL_ERROR_ZERO_RETURN:
+                    {
+                        fd_set fds;
+                        DEBUG_SPEEDTEST_ERROR("SSL_ERROR_WANT_READ :%i\r\n", count);
+                        int sock_fd = SSL_get_rfd(ssl);
+                        FD_ZERO(&fds);
+                        FD_SET(sock_fd, &fds);
+                        tv.tv_sec = 3;
+                        tv.tv_usec = 0;
+                        ret = select(sock_fd + 1, NULL, &fds, NULL, &tv);
+                        if (ret > 0 && FD_ISSET(fd, &fdSet))
+                        {
+                            /*Back to read data*/
+                            continue; // can write more data now...
+                        }
+
+                        if (ret == 0) 
+                        {
+                            // timeout...
+                            break;
+                        } 
+                        else 
+                        {
+                            // error...
+                            DEBUG_SPEEDTEST_VERBOSE("Cannot receive data\r\n");
+                            break;
+                        }
+                    }
+                        break;
+                    default:
+                    {
+                        DEBUG_SPEEDTEST_ERROR("error %i:%i\n", recv_byte, ret); 
+                        break;
+                    }
+                }
+            }
+            if (thread_all_stop)
+            {
                 break;
-        }   
+            }
+        }
     }
+
 err: 
+    if (t_arg->protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        SSL_shutdown(ssl);
+        SSL_free (ssl);
+        SSL_CTX_free (ctx);
+    }
     if(fd) 
     {
         close(fd);
     }
+
     t_arg->running = 0;
     return NULL;
 }
@@ -182,6 +339,19 @@ static void *upload_thread(void *arg)
     int i, j, size = 0;
     struct timeval tv;
     fd_set fdSet;
+
+    int ret = 0;
+    SSL *ssl = NULL;
+    SSL_CTX *ctx = NULL;
+    SSL_METHOD *client_method = NULL;
+    X509 *server_cert = NULL;
+    // char *str, *host_name, output_buf[4096], input_buf[4096], host_header[512];
+    struct hostent *host_entry = NULL;
+    struct sockaddr_in server_socket_address;
+    struct in_addr ip;    
+    char *x509_str;
+    int count = 0;
+
 
     st_thread_data_t *t_arg = (st_thread_data_t*)arg;
     i = t_arg->thread_index;
@@ -201,17 +371,76 @@ static void *upload_thread(void *arg)
         sleep(1);
         goto err;
     }
+    if(t_arg->protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        SSLeay_add_ssl_algorithms();
+        client_method = (SSL_METHOD*)SSLv23_client_method();
+        SSL_load_error_strings();
+        ctx = SSL_CTX_new(client_method); 
+        if(ctx == NULL)
+        {
+            DEBUG_SPEEDTEST_ERROR("Cannot create certificate ctx\r\n");
+        }
+        DEBUG_SPEEDTEST_VERBOSE("(1) SSL context initialized\n\n");
+        ssl = SSL_new(ctx); /* create SSL stack endpoint*/
+        if(ssl == NULL)
+        {
+            DEBUG_SPEEDTEST_ERROR("Cannot create certificate ssl\r\n");
+        }
 
+        SSL_set_fd(ssl, fd); /* attach SSL stack to socket
+        */
+        ret = SSL_connect(ssl); /* initiate SSL handshake */ 
+        DEBUG_SPEEDTEST_VERBOSE("(4) SSL endpoint created & handshake completed\n\n");
+        printf("(5) SSL connected with cipher: %s\n\n",
+        SSL_get_cipher(ssl));
+        if(SSL_get_cipher(ssl) == NULL)
+        {
+            DEBUG_SPEEDTEST_VERBOSE("Cannot get cirpher \r\n");
+        }
+        if(server_cert == NULL)
+        {
+            DEBUG_SPEEDTEST_VERBOSE("Cannot get cirpher X509 \r\n");
+        }
+
+        DEBUG_SPEEDTEST_VERBOSE("(6) server's certificate was received:\n\n");
+
+        x509_str = X509_NAME_oneline(X509_get_subject_name(server_cert), 0, 0);
+        DEBUG_SPEEDTEST_VERBOSE(" subject: %s\n", x509_str);
+
+        x509_str = X509_NAME_oneline(X509_get_issuer_name(server_cert), 0, 0);
+        DEBUG_SPEEDTEST_VERBOSE(" issuer: %s\n\n", x509_str);
+
+        /* certificate verification would happen here */
+
+        X509_free(server_cert);
+    }
     sprintf(sbuf,
             "POST /%s HTTP/1.0\r\n"
             "Content-type: application/x-www-form-urlencoded\r\n"
             "Host: %s\r\n"
             "Content-Length: %ld\r\n\r\n", t_arg->request_url, t_arg->domain_name, sizeof(data) * UL_BUFFER_TIMES);
 
-    if((size = send(fd, sbuf, strlen(sbuf), 0)) != strlen(sbuf)) 
+
+    if (t_arg->protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
     {
-        printf("Can't send header to server\n");
-        goto err;
+        if ((size = send(fd, sbuf, strlen(sbuf), 0)) != strlen(sbuf)) 
+        {
+            DEBUG_SPEEDTEST_ERROR("HTTP Can't send header to server\n");
+            goto err;
+        }
+    }
+    else if (t_arg->protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        if (size = SSL_write(ssl, sbuf, strlen(sbuf)) != strlen(sbuf))
+        {
+            DEBUG_SPEEDTEST_ERROR("HTTPS Can't send header to server\n");
+            goto err;
+        }
+    }
+    else 
+    {
+        DEBUG_ERROR("Invalid protocol\r\n");
     }
 
     pthread_mutex_lock(&pthread_mutex);
@@ -220,10 +449,25 @@ static void *upload_thread(void *arg)
 
     for (j = 0; j < UL_BUFFER_TIMES; j++) 
     {
-        if ((size = send(fd, data, sizeof(data), 0)) != sizeof(data)) 
+        if (t_arg->protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
         {
-            printf("Can't send data to server\n");
-            goto err;
+            if ((size = send(fd, data, sizeof(data), 0)) != sizeof(sbuf)) 
+            {
+                DEBUG_SPEEDTEST_ERROR("HTTP Can't send header to server\n");
+                goto err;
+            }
+        }
+        else if (t_arg->protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+        {
+            if (size = SSL_write(ssl, data, sizeof(data)) != sizeof(data))
+            {
+                DEBUG_SPEEDTEST_ERROR("HTTPS Can't send header to server\n");
+                goto err;
+            }
+        }
+        else 
+        {
+            DEBUG_ERROR("Invalid protocol\r\n");
         }
         pthread_mutex_lock(&pthread_mutex);
         total_ul_size += size;
@@ -231,34 +475,99 @@ static void *upload_thread(void *arg)
         if(thread_all_stop)
             goto err;
     }
-
-    while(1) 
+    if (t_arg->protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
     {
-        FD_ZERO(&fdSet);
-        FD_SET(fd, &fdSet);
-
-        tv.tv_sec = 3;
-        tv.tv_usec = 0;
-        int status = select(fd + 1, &fdSet, NULL, NULL, &tv);                                                         
-
-        int recv_byte = recv(fd, sbuf, sizeof(sbuf), 0);
-        if(status > 0 && FD_ISSET(fd, &fdSet)) 
+        while(1) 
         {
-            if(recv_byte < 0) 
+            FD_ZERO(&fdSet);
+            FD_SET(fd, &fdSet);
+
+            tv.tv_sec = 3;
+            tv.tv_usec = 0;
+            int status = select(fd + 1, &fdSet, NULL, NULL, &tv);                                                         
+
+            int recv_byte = recv(fd, sbuf, sizeof(sbuf), 0);
+            if(status > 0 && FD_ISSET(fd, &fdSet)) 
             {
-                printf("Can't receive data!\n");
-                break;
-            } 
-            else if (recv_byte == 0)
+                if(recv_byte < 0) 
+                {
+                    printf("Can't receive data!\n");
+                    break;
+                } 
+                else if (recv_byte == 0)
+                {
+                    break;
+                }
+            }   
+        }
+    }
+    else if (t_arg->protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        while (1)
+        {
+            int recv_byte = SSL_read(ssl, sbuf, sizeof(sbuf));
+            if (recv_byte > 0)
             {
-                break;
+
             }
-        }   
+            else 
+            {
+                count++;
+                ret = SSL_get_error(ssl, recv_byte);
+                switch(ret)
+                {
+                    case SSL_ERROR_NONE:
+                    {
+                        DEBUG_SPEEDTEST_ERROR("SSL_ERROR_NONE %i\r\n", count);
+                    }
+                        break;
+                    case SSL_ERROR_ZERO_RETURN:
+                    {
+                        fd_set fds;
+                        DEBUG_SPEEDTEST_ERROR("SSL_ERROR_WANT_READ :%i\r\n", count);
+                        int sock_fd = SSL_get_rfd(ssl);
+                        FD_ZERO(&fds);
+                        FD_SET(sock_fd, &fds);
+                        tv.tv_sec = 3;
+                        tv.tv_usec = 0;
+                        ret = select(sock_fd + 1, NULL, &fds, NULL, &tv);
+                        if (ret > 0)
+                            continue; // can write more data now...
+
+                        if (ret == 0) 
+                        {
+                            // timeout...
+                            break;
+                        } 
+                        else 
+                        {
+                            // error...
+                            DEBUG_SPEEDTEST_VERBOSE("Cannot receive data\r\n");
+                            break;
+                        }
+                    }
+                        break;
+                    default:
+                    {
+                        DEBUG_SPEEDTEST_ERROR("error %i:%i\n", recv_byte, ret); 
+                        break;
+                    }
+                }
+            }
+        }
     }
 err: 
+    if (t_arg->protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
+    {
+        SSL_shutdown(ssl);
+        //close (fd);
+        SSL_free (ssl);
+        SSL_CTX_free (ctx);
+    }
     if (fd) 
         close(fd);
     t_arg->running = 0;
+
     return NULL;
 }
 /**
@@ -342,7 +651,7 @@ static void *calculate_dl_speed_thread(void *arg)
  * @param number_of_thread Number of threads to use for download.
  * @return 1 on success, -1 on failure.
  */
-int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thread) 
+int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thread, st_server_protocol_t protocol) 
 {
     const char download_filename[64] = "random3500x3500.jpg";  //23MB
     char url[128]= {0}, request_url[128] = {0}, dummy[128] = {0}, buf[128];
@@ -414,7 +723,7 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
             memcpy(&download_thread_data[i].servinfo, &nearest_server->servinfo, sizeof(download_thread_data[i].servinfo));
             memcpy(download_thread_data[i].domain_name, nearest_server->domain_name, sizeof(nearest_server->domain_name));
             memcpy(download_thread_data[i].request_url, request_url, sizeof(request_url));
-            
+            download_thread_data[i].protocol = protocol;
             if(download_thread_data[i].running == 0) 
             {
                 download_thread_data[i].thread_index = i;
@@ -443,10 +752,10 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
  * @param number_of_thread Number of threads to use for upload.
  * @return 1 on success, -1 on failure.
  */
-int speedtest_upload(server_data_t *test_server, unsigned int number_of_thread) 
+int speedtest_upload(server_data_t *test_server, unsigned int number_of_thread, st_server_protocol_t protocol) 
 {
     int i;
-    char dummy[128]={0}, request_url[128]={0};
+    char dummy[128] = {0}, request_url[128]={0};
     sscanf(test_server->url, "http://%[^/]/%s", dummy, request_url);
     start_ul_time = st_utilities_get_uptime();
     pthread_t calculate_thread;
@@ -486,6 +795,7 @@ int speedtest_upload(server_data_t *test_server, unsigned int number_of_thread)
             memcpy(&up_thread_data[i].servinfo, &test_server->servinfo, sizeof(up_thread_data[i].servinfo));
             memcpy(up_thread_data[i].domain_name, test_server->domain_name, sizeof(test_server->domain_name));
             memcpy(up_thread_data[i].request_url, request_url, sizeof(request_url));
+            up_thread_data[i].protocol = protocol;
             if(up_thread_data[i].running == 0) 
             {
                 up_thread_data[i].thread_index = i;
@@ -533,12 +843,12 @@ int speedtest_test_domain_name(char *p_domain_name, st_server_protocol_t protoco
     }
     if(operation == SPEEDTEST_SERVER_OPERATION_UPLOAD)
     {
-        return speedtest_upload(&server_data, number_of_thread);
+        return speedtest_upload(&server_data, number_of_thread, protocol);
          
     }
     else if (operation == SPEEDTEST_SERVER_OPERATION_DOWNLOAD)
     {
-        return speedtest_download(&server_data, number_of_thread);
+        return speedtest_download(&server_data, number_of_thread, protocol);
     }
 }
 /**
@@ -598,12 +908,12 @@ int speedtest_test_lowest_latency(st_server_protocol_t protocol, st_server_opera
         DEBUG_SPEEDTEST_VERBOSE("===============================================\n");
         if(operation == SPEEDTEST_SERVER_OPERATION_UPLOAD)
         {
-            return speedtest_upload(&nearest_servers[best_server_index], number_of_thread);
+            return speedtest_upload(&nearest_servers[best_server_index], number_of_thread, protocol);
             
         }
         else if (operation == SPEEDTEST_SERVER_OPERATION_DOWNLOAD)
         {
-            return speedtest_download(&nearest_servers[best_server_index], number_of_thread);
+            return speedtest_download(&nearest_servers[best_server_index], number_of_thread, protocol);
         }
         else
         {
