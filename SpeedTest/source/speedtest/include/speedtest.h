@@ -77,7 +77,7 @@ typedef struct {
 /**
  * @brief Log debugging level of the source file
  */
-#define DEBUG_SPEEDTEST_LEVEL DEBUG_LEVEL_VERBOSE
+#define DEBUG_SPEEDTEST_LEVEL DEBUG_LEVEL_NONE
 /**
  * @brief Number of nearest servers to consider.
  */
@@ -105,7 +105,7 @@ typedef struct {
 /**
  * @brief Dureation in second for each speed test task
  */
-#define SPEEDTEST_DURATION 5
+#define SPEEDTEST_DURATION 15
 
 
 

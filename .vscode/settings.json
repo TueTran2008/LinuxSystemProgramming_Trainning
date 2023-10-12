@@ -1,6 +1,6 @@
 {
     "files.associations": {
-        "*.inc": "c",
-        "sstream": "c"
+        "chrono": "c",
+        "socket": "c"
     }
 }

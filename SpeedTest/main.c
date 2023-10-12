@@ -38,7 +38,7 @@ static st_server_operation_t operation = SPEEDTEST_SERVER_OPERATION_UPLOAD;
 /**
  * @brief Default number of threads for the speed test.
  */
-static unsigned int number_of_thread = 3;
+static unsigned int number_of_thread = 10;
 /**
  * @brief Flag to indicate if a custom server URL is provided.
  */
@@ -63,6 +63,7 @@ static bool  m_test_only_download = false;
 static void print_help(void)
 {
     DEBUG_INFO("Usage (options are case sensitive):\r\n"
+              "No argument: Default - pick lowest latancy among 10 nearest"
               "--help - Show this help\r\n"
               "--download_testing - Run only download testing\r\n"
               "--upload_testing - Run only upload testing\r\n"

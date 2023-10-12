@@ -323,7 +323,7 @@ err:
     {
         close(fd);
     }
-    //t_arg->running = 0;
+    t_arg->running = 0;
     return NULL;
 }
 /**
@@ -347,7 +347,6 @@ static void *upload_thread(void *arg)
     X509 *server_cert = NULL;
     // char *str, *host_name, output_buf[4096], input_buf[4096], host_header[512];
     struct hostent *host_entry = NULL;
-    struct sockaddr_in server_socket_address;
     struct in_addr ip;    
     char *x509_str;
     int count = 0;
@@ -448,25 +447,11 @@ static void *upload_thread(void *arg)
 
     for (j = 0; j < UL_BUFFER_TIMES; j++) 
     {
-        if (t_arg->protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
+
+        if ((size = send(fd, data, sizeof(data), 0)) != sizeof(data)) 
         {
-            if ((size = send(fd, data, sizeof(data), 0)) != sizeof(data)) 
-            {
-                DEBUG_SPEEDTEST_ERROR("%s: HTTP Can't upload data to server - size: %ld\n", __FUNCTION__, size);
-                goto err;
-            }
-        }
-        else if (t_arg->protocol == SPEEDTEST_SERVER_PROTOCOL_HTTPS)
-        {
-            if (size = SSL_write(ssl, data, sizeof(data)) != sizeof(data))
-            {
-                DEBUG_SPEEDTEST_ERROR("%s: HTTPS Can't send header to server\n", __FUNCTION__);
-                goto err;
-            }
-        }
-        else 
-        {
-            DEBUG_ERROR("Invalid protocol\r\n");
+            DEBUG_SPEEDTEST_ERROR("%s: HTTP Can't upload data to server - size: %ld\n", __FUNCTION__, size);
+            goto err;
         }
         pthread_mutex_lock(&pthread_mutex);
         total_ul_size += size;
@@ -565,82 +550,8 @@ err:
     }
     if (fd) 
         close(fd);
-    //t_arg->running = 0;
+    t_arg->running = 0;
 
-    return NULL;
-}
-/**
- * @brief Calculate update speed thread function.
- *
- * @param arg Unused argument.
- * @return NULL.
- */
-static void *calculate_ul_speed_thread() 
-{
-    double ul_speed = 0.0, duration = 0;
-    while(1) 
-    {
-        stop_ul_time = st_utilities_get_uptime();
-        duration = stop_ul_time-start_ul_time;
-        ul_speed = (double)total_ul_size /1000 /1000 /duration *8;
-        if(duration>0) {
-            printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bUpload speed: %0.2lf Mbps", ul_speed);
-            fflush(stdout);
-        }
-        usleep(500000);
-
-        if (thread_all_stop) 
-        {
-            stop_ul_time = st_utilities_get_uptime();
-            duration = stop_ul_time-start_ul_time;
-            ul_speed = (double)total_ul_size/1000/1000/duration*8;
-            if (duration) 
-            {
-                printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bUpload speed: %0.2lf Mbps\r\n", ul_speed);
-                fflush(stdout);
-            }
-            break;
-        }
-    }
-    return NULL;
-}
-/**
- * @brief Calculate download speed thread function.
- *
- * @param arg Unused argument.
- * @return NULL.
- */
-static void *calculate_dl_speed_thread(void *arg)
-{
-    (void)(arg);
-    double dl_speed = 0.0, duration = 0;
-    DEBUG_RAW("\r\n");
-    while(1) 
-    {
-        stop_dl_time = st_utilities_get_uptime();
-        //printf("Stop download time: %f\r\n", stop_dl_time);
-        duration = stop_dl_time - start_dl_time;
-        dl_speed = (double)total_dl_size / 1000 / 1000 / duration * 8;
-        if(duration > 0) 
-        {
-            printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bDownload speed: %0.2lf Mbps", dl_speed);
-            fflush(stdout);
-        }
-        usleep(500000);
-        if(thread_all_stop) 
-        {
-            stop_dl_time = st_utilities_get_uptime();
-            duration = stop_dl_time-start_dl_time;
-            //dl_speed = (double)total_dl_size/1024/1024/duration*8;
-            dl_speed = (double)total_dl_size/1000/1000/duration*8;
-            if(duration > 0) 
-            {
-                printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bDownload speed: %0.2lf Mbps\r\n", dl_speed);
-                fflush(stdout);
-            }   
-            break;
-        }
-    }
     return NULL;
 }
 /**
@@ -656,10 +567,9 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
     char url[128]= {0}, request_url[128] = {0}, dummy[128] = {0}, buf[128];
     char *ptr = NULL;
     int i;
-    //pthread_t *download_thread = (pthread_t *)malloc(number_of_thread * sizeof(pthread_t));
     st_thread_data_t *download_thread_data = (st_thread_data_t*)malloc(number_of_thread * sizeof(st_thread_data_t));
     memset(download_thread_data, 0, sizeof(st_thread_data_t) * number_of_thread);
-    pthread_t calculate_thread;
+    printf("Speed test download domain name: %s\r\n", nearest_server->domain_name);
     struct itimerval timer_val;
     if (nearest_server == NULL)
     {
@@ -676,7 +586,6 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
         DEBUG_SPEEDTEST_ERROR("Cannot allocate memory of download thread\r\n");
         return -1;
     }
-    pthread_create(&calculate_thread, NULL, calculate_dl_speed_thread, NULL);
     /*Get the URL of the download site*/
     /*speedtesthni2.viettel.vn:8080
         http://speedtesthni2.viettel.vn:8080/speedtest/upload.php
@@ -740,14 +649,25 @@ int speedtest_download(server_data_t *nearest_server, unsigned int number_of_thr
         }
         if (thread_all_stop)
         {
+            
+            stop_dl_time = st_utilities_get_uptime();
+            float duration = stop_dl_time - start_dl_time;
+            float dl_speed = (double)total_dl_size/1000/1000/duration*8;
+            printf("Download speed: %0.2lf Mbps\r\n", dl_speed);
             break;
         }
     }
     for(i = 0; i < number_of_thread; i++) 
     {
-        pthread_detach(download_thread_data[i].tid);
+        if(pthread_join(download_thread_data[i].tid, NULL) == 0)
+        {
+            DEBUG_SPEEDTEST_VERBOSE("Download thread delete: %ld\r\n", download_thread_data[i].tid);
+        }
+        else
+        {
+            DEBUG_SPEEDTEST_ERROR("Error delete thread delete: %ld\r\n", download_thread_data[i].tid);
+        }
     }
-    pthread_detach(calculate_thread);
     free(download_thread_data);
     return 1;
 }
@@ -770,8 +690,9 @@ int speedtest_upload(server_data_t *test_server, unsigned int number_of_thread, 
     {
         sscanf(test_server->url, "https://%[^/]/%s", dummy, request_url);
     }
+    printf("Speed test upload domain name: %s\r\n", test_server->domain_name);
     start_ul_time = st_utilities_get_uptime();
-    pthread_t calculate_thread;
+    //pthread_t calculate_thread;
     struct itimerval timer_val;
     if (test_server == NULL)
     {
@@ -790,7 +711,6 @@ int speedtest_upload(server_data_t *test_server, unsigned int number_of_thread, 
         return -1;
     }
     memset(up_thread_data, 0, sizeof(st_thread_data_t) * number_of_thread);
-    pthread_create(&calculate_thread, NULL, calculate_ul_speed_thread, NULL);
     signal(SIGALRM, speedtest_stop_all_thread);
     timer_val.it_value.tv_sec = SPEEDTEST_DURATION;
     timer_val.it_value.tv_usec = 0;
@@ -827,15 +747,18 @@ int speedtest_upload(server_data_t *test_server, unsigned int number_of_thread, 
         if (thread_all_stop)
         {
             DEBUG_SPEEDTEST_VERBOSE("Stop all task\r\n");
+            stop_ul_time = st_utilities_get_uptime();
+            float duration = stop_ul_time - start_ul_time;
+            float ul_speed = (double)total_ul_size/1000/1000/duration*8;
+            printf("Upload speed: %0.2lf Mbps\r\n", ul_speed);
             break;
         }
     }
     for (i = 0; i < number_of_thread; i++) 
     {
-        DEBUG_SPEEDTEST_VERBOSE("Delete thread upload: %d\r\n", up_thread_data[i].tid);
+        DEBUG_SPEEDTEST_VERBOSE("Delete thread upload: %ld\r\n", up_thread_data[i].tid);
         pthread_join(up_thread_data[i].tid, NULL);
     }
-    pthread_detach(calculate_thread);
     free(up_thread_data);
     return 1;
 }
@@ -892,6 +815,7 @@ int speedtest_test_lowest_latency(st_server_protocol_t protocol, st_server_opera
     struct itimerval timerVal;
     char operation_buf[24];
     memset(operation_buf, 0, sizeof(operation_buf));
+    printf("Process to find the best server...\r\n");
     if (protocol == SPEEDTEST_SERVER_PROCOTOL_HTTP)
     {
         sprintf(operation_buf, "%s", "http");
