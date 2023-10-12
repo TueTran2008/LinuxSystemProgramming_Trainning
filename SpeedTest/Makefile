@@ -15,7 +15,7 @@ SRC += source/user_app/old_app_debug/*.c
 
 INC += -I./source/user_app/utilities/include
 SRC += source/user_app/utilities/*.c
-all: main.c $(SRC) speedtest
+all: main.c $(SRC) clean speedtest
 	$(CC) $(INC) main.c  $(SRC) -o speedtest -lpthread -lm -lcrypto -lssl 
 speedtest:
 	sudo apt-get install openssl libssl-dev
