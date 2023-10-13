@@ -91,7 +91,7 @@ int socket_http_get_file(struct sockaddr_in *serv, socklen_t sock_len, char *dom
     memset(tmp_path, 0, sizeof(tmp_path));
     memset(rbuf, 0, sizeof(sbuf));
     DEBUG_SOCKET_HTTP_VERBOSE("%s: Sin family:%d\r\n", __FUNCTION__, serv->sin_family);
-    if ((fd = socket(serv->sin_family, SOCK_STREAM, 0)) == -1) 
+    if ((fd = socket(serv->sin_family, SOCK_STREAM | SOCK_NONBLOCK, 0)) == -1) 
     {
         DEBUG_SOCKET_HTTP_ERROR("Open socket error!\n");
         if (fd)
@@ -100,7 +100,7 @@ int socket_http_get_file(struct sockaddr_in *serv, socklen_t sock_len, char *dom
         }
         return 0;
     }
-    if (socket_utilities_connect_timeout(fd, (struct sockaddr *)serv, sock_len) == -1) 
+    if (socket_utilities_connect_timeout(fd, (struct sockaddr *)serv, sock_len, 10) == -1) 
     {
         DEBUG_SOCKET_HTTP_ERROR("%s: Socket connect error!\r\nDomain: %s - errno: %s\r\n", __FUNCTION__, domain_name, strerror(errno));
         if (fd) 

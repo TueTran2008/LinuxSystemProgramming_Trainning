@@ -120,7 +120,6 @@ static void *download_thread(void *arg)
     SSL_CTX *ctx = NULL;
     SSL_METHOD *client_method = NULL;
     X509 *server_cert = NULL;
-    // char *str, *host_name, output_buf[4096], input_buf[4096], host_header[512];
     struct hostent *host_entry = NULL;
     struct sockaddr_in server_socket_address;
     struct in_addr ip;    
@@ -426,7 +425,7 @@ static void *upload_thread(void *arg)
     {
         if ((size = send(fd, sbuf, strlen(sbuf), 0)) != strlen(sbuf)) 
         {
-            DEBUG_SPEEDTEST_ERROR("HTTP Can't send header to server\n");
+            DEBUG_SPEEDTEST_ERROR("HTTP Can't send header to server - errno: %s\n", strerror(errno));
             goto err;
         }
     }
@@ -452,8 +451,8 @@ static void *upload_thread(void *arg)
 
         if ((size = send(fd, data, sizeof(data), 0)) != sizeof(data)) 
         {
-            DEBUG_SPEEDTEST_ERROR("%s: HTTP Can't upload data to server - size: %ld\n", __FUNCTION__, size);
-            goto err;
+            //DEBUG_SPEEDTEST_ERROR("%s: HTTP Can't upload data to server - size: %ld - errno:%s\n", __FUNCTION__, size, strerror(errno));
+            //goto err;
         }
         pthread_mutex_lock(&pthread_mutex);
         total_ul_size += size;
