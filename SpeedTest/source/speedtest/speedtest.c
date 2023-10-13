@@ -134,7 +134,7 @@ static void *download_thread(void *arg)
         sleep(5);
         goto err;
     }
-    if (socket_utilities_connect_timeout(fd, (struct sockaddr *)t_arg->servinfo.ai_addr) == -1) {
+    if (connect(fd, (struct sockaddr *)t_arg->servinfo.ai_addr, t_arg->servinfo.ai_addrlen) == -1) {
         DEBUG_SPEEDTEST_ERROR("Domain name: %s - Socket connect error! - errno:%s\r\n", t_arg->domain_name, strerror(errno));
         sleep(1);
         goto err;
@@ -364,7 +364,7 @@ static void *upload_thread(void *arg)
         DEBUG_SPEEDTEST_ERROR("Open socket error!\n");
         goto err;
     }
-    if (socket_utilities_connect_timeout(fd, (struct sockaddr *)t_arg->servinfo.ai_addr) == -1)
+    if (connect(fd, (struct sockaddr *)t_arg->servinfo.ai_addr, t_arg->servinfo.ai_addrlen) == -1)
     {
         DEBUG_SPEEDTEST_ERROR("Domain name:%s - Socket connect error! - errno: %s\r\n", t_arg->domain_name, strerror(errno));
         sleep(1);
@@ -835,7 +835,7 @@ int speedtest_test_lowest_latency(st_server_protocol_t protocol, st_server_opera
     }
     if (socket_ipv4_get_from_url(SPEEDTEST_DOMAIN_NAME, operation_buf, &servinfo)) 
     {
-        if (!socket_http_get_file((struct sockaddr_in *)servinfo.ai_addr, SPEEDTEST_DOMAIN_NAME, CONFIG_REQUEST_URL, CONFIG_REQUEST_URL)) 
+        if (!socket_http_get_file((struct sockaddr_in *)servinfo.ai_addr, servinfo.ai_addrlen, SPEEDTEST_DOMAIN_NAME, CONFIG_REQUEST_URL, CONFIG_REQUEST_URL)) 
         {
             DEBUG_ERROR("Can't get your IP address information.\n");
             return -1;
@@ -843,7 +843,7 @@ int speedtest_test_lowest_latency(st_server_protocol_t protocol, st_server_opera
     }
     if(socket_ipv4_get_from_url(SPEEDTEST_SERVERS_DOMAIN_NAME, operation_buf, &servinfo)) 
     {
-        if(!socket_http_get_file((struct sockaddr_in *)servinfo.ai_addr, SPEEDTEST_SERVERS_DOMAIN_NAME, SERVERS_LOCATION_REQUEST_URL, SERVERS_LOCATION_REQUEST_URL)) {
+        if(!socket_http_get_file((struct sockaddr_in *)servinfo.ai_addr, servinfo.ai_addrlen, SPEEDTEST_SERVERS_DOMAIN_NAME, SERVERS_LOCATION_REQUEST_URL, SERVERS_LOCATION_REQUEST_URL)) {
             DEBUG_ERROR("Can't get servers list.\n");
             return -1;
         }

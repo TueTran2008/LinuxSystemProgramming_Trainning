@@ -26,10 +26,11 @@
  * @param serv Pointer to a sockaddr_in structure representing the server address.
  * @param domain_name The domain name of the server.
  * @param request_url The URL to request from the server.
+ * @param sock_len Socket len specify by addressinfo
  * @param filename The name of the file to save the HTTP response.
  * @return 1 if the HTTP request is successful and the response is saved, 0 otherwise.
  */
-int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *request_url, char *filename);
+int socket_http_get_file(struct sockaddr_in *serv, socklen_t sock_len, char *domain_name, char *request_url, char *filename);
 
 /**
  * @brief Performs an HTTPS GET request and saves the response to a file.

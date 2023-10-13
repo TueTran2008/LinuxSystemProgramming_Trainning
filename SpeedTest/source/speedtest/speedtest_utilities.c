@@ -132,7 +132,7 @@ int st_utilities_get_best_server(server_data_t *nearest_servers, st_server_proto
         {
             memcpy(&nearest_servers[i].servinfo, &servinfo, sizeof(servinfo));
             gettimeofday(&tv1, NULL);
-            socket_http_get_file((struct sockaddr_in *)servinfo.ai_addr, nearest_servers[i].domain_name, latency_request_url, latency_name);
+            socket_http_get_file((struct sockaddr_in *)servinfo.ai_addr, servinfo.ai_addrlen,nearest_servers[i].domain_name, latency_request_url, latency_name);
             gettimeofday(&tv2, NULL);
         }
 

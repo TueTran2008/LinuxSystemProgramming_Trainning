@@ -48,7 +48,7 @@
 #define DEBUG_SOCKET_UTILITIES_RAW(format_, ...) (void)(0)
 #endif
 
-int socket_utilities_connect_timeout(int socket_fd, struct sockaddr *server) 
+int socket_utilities_connect_timeout(int socket_fd, struct sockaddr *server, socklen_t  sock_len) 
 { 
   int res; 
   struct sockaddr_in addr; 
@@ -68,7 +68,7 @@ int socket_utilities_connect_timeout(int socket_fd, struct sockaddr *server)
     DEBUG_SOCKET_UTILITIES_ERROR("Error fcntl(..., F_SETFL) (%s)\n", strerror(errno)); 
     return -1;
   } 
-  res = connect(socket_fd, server, sizeof(addr)); 
+  res = connect(socket_fd, server, sock_len); 
   if (res < 0) 
   { 
     if (errno == EINPROGRESS) 

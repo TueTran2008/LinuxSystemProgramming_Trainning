@@ -24,8 +24,9 @@
  *
  * @param socket_fd The socket file descriptor.
  * @param server A pointer to the sockaddr structure representing the server address.
+ * @param sock_len Socket len specify by socket addressin
  * @return 0 if the connection is successful, -1 on timeout or failure.
  */
-int socket_utilities_connect_timeout(int socket_fd, struct sockaddr *server);
+int socket_utilities_connect_timeout(int socket_fd, struct sockaddr *server, socklen_t  sock_len);
 
 #endif /* SOCKET_ULTILITIES_H */

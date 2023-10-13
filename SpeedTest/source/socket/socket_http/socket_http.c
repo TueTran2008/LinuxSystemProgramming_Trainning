@@ -78,7 +78,7 @@
  * @param filename The name of the file to save the HTTP response.
  * @return 1 if the HTTP request is successful and the response is saved, 0 otherwise.
  */
-int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *request_url, char *filename) 
+int socket_http_get_file(struct sockaddr_in *serv, socklen_t sock_len, char *domain_name, char *request_url, char *filename) 
 {
     int fd;
     char sbuf[256] = {0}, tmp_path[128] = {0};
@@ -100,7 +100,7 @@ int socket_http_get_file(struct sockaddr_in *serv, char *domain_name, char *requ
         }
         return 0;
     }
-    if (socket_utilities_connect_timeout(fd, (struct sockaddr *)serv) == -1) 
+    if (socket_utilities_connect_timeout(fd, (struct sockaddr *)serv, sock_len) == -1) 
     {
         DEBUG_SOCKET_HTTP_ERROR("%s: Socket connect error!\r\nDomain: %s - errno: %s\r\n", __FUNCTION__, domain_name, strerror(errno));
         if (fd) 
