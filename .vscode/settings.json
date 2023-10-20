@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "chrono": "c",
-        "socket": "c"
+        "socket": "c",
+        "condition_variable": "c",
+        "future": "c"
     }
 }
